@@ -59,7 +59,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg"></div>
-            <span className="text-xl font-bold text-gray-900">ModernApp</span>
+            <span className="text-xl font-bold text-gray-900">MelikShop</span>
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
           <p className="text-gray-600">Sign in to your account to continue</p>

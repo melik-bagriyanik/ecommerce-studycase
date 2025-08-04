@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ModernApp - Next Generation Digital Platform",
+  title: "MelikShop - Next Generation Digital Platform",
   description: "Experience the future of digital innovation with our modern, secure, and lightning-fast platform.",
 };
 
