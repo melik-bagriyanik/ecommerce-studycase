@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import CartSidebar from '../components/CartSidebar';
 
 interface Category {
   id: number;
@@ -14,6 +15,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([
     {
       id: 1,
@@ -137,14 +139,17 @@ export default function CategoriesPage() {
           </Link>
           
           {/* Shopping Cart Icon */}
-          <Link href="/cart" className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors"
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
             </svg>
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
               3
             </span>
-          </Link>
+          </button>
           
           {/* Profile Icon */}
           <Link href="/profile" className="p-2 text-gray-600 hover:text-blue-600 transition-colors">
@@ -176,7 +181,10 @@ export default function CategoriesPage() {
             </svg>
             <span>Ürünler</span>
           </Link>
-          <Link href="/cart" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600 relative">
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600 relative"
+          >
             <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
             </svg>
@@ -184,7 +192,7 @@ export default function CategoriesPage() {
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
               3
             </span>
-          </Link>
+          </button>
           <Link href="/profile" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
             <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -330,6 +338,9 @@ export default function CategoriesPage() {
           </div>
         </div>
       </footer>
+
+      {/* Cart Sidebar */}
+      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </div>
   );
 } 
