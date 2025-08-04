@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -43,6 +43,7 @@ interface Product {
 
 function ProductsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const categoryId = searchParams.get('category');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -163,7 +164,12 @@ function ProductsContent() {
 
     // Filter by category from URL
     if (categoryId) {
-      filtered = filtered.filter(product => product.category === parseInt(categoryId));
+      const categoryIdNum = parseInt(categoryId);
+      filtered = filtered.filter(product => product.category === categoryIdNum);
+      // Update selected categories when URL has category parameter
+      if (!selectedCategories.includes(categoryIdNum)) {
+        setSelectedCategories([categoryIdNum]);
+      }
     }
 
     // Filter by selected categories
@@ -341,9 +347,6 @@ function ProductsContent() {
           <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
             Ana Sayfa
           </Link>
-          <Link href="/categories" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-            Kategoriler
-          </Link>
           <Link href="/products" className="text-blue-600 font-medium transition-colors">
             Ürünler
           </Link>
@@ -395,10 +398,7 @@ function ProductsContent() {
             <HomeIcon className="text-lg mb-1" />
             <span>Ana Sayfa</span>
           </Link>
-          <Link href="/categories" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <CategoryIcon className="text-lg mb-1" />
-            <span>Kategoriler</span>
-          </Link>
+
           <Link href="/products" className="flex flex-col items-center text-xs text-blue-600">
             <ShoppingIcon className="text-lg mb-1" />
             <span>Ürünler</span>
@@ -424,15 +424,23 @@ function ProductsContent() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Ürünler</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            {categoryId && categories.find(cat => cat.id === parseInt(categoryId)) 
+              ? `${categories.find(cat => cat.id === parseInt(categoryId))?.name} Ürünleri`
+              : 'Ürünler'
+            }
+          </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Binlerce kaliteli ürün arasından seçiminizi yapın. Filtreleme ve sıralama seçenekleri ile istediğiniz ürünü kolayca bulun.
+            {categoryId && categories.find(cat => cat.id === parseInt(categoryId))
+              ? `${categories.find(cat => cat.id === parseInt(categoryId))?.name} kategorisindeki ürünleri keşfedin.`
+              : 'Binlerce kaliteli ürün arasından seçiminizi yapın. Filtreleme ve sıralama seçenekleri ile istediğiniz ürünü kolayca bulun.'
+            }
           </p>
         </div>
 
         {/* Search and Filters Bar */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div className="col-span-1 md:col-span-2">
               <Input
                 placeholder="Ürün ara..."
@@ -452,6 +460,31 @@ function ProductsContent() {
                 <option value="price">Fiyata göre</option>
                 <option value="rating">Puana göre</option>
                 <option value="newest">En yeni</option>
+              </select>
+            </div>
+            <div className="col-span-1 md:col-span-1">
+              <select
+                className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={selectedCategories.length > 0 ? selectedCategories[0] : ''}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  if (value) {
+                    setSelectedCategories([value]);
+                    // Update URL with category parameter
+                    router.push(`/products?category=${value}`);
+                  } else {
+                    setSelectedCategories([]);
+                    // Remove category from URL
+                    router.push('/products');
+                  }
+                }}
+              >
+                <option value="">Tüm Kategoriler</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="col-span-1 md:col-span-1">

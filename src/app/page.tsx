@@ -3,6 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import Button from './components/ui/Button';
 import Card from './components/ui/Card';
 import Input from './components/ui/Input';
@@ -51,6 +56,36 @@ interface Category {
 export default function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
+
+  const banners = [
+    {
+      id: 1,
+      title: 'Yeni Sezon Koleksiyonu',
+      subtitle: 'En trend ürünler %50\'ye kadar indirimle',
+      image: '/banner1.jpg',
+      buttonText: 'Alışverişe Başla',
+      buttonLink: '/products',
+      gradient: 'from-blue-600 to-purple-600'
+    },
+    {
+      id: 2,
+      title: 'Elektronik Fırsatları',
+      subtitle: 'Teknoloji ürünlerinde büyük indirimler',
+      image: '/banner2.jpg',
+      buttonText: 'Elektronik Keşfet',
+      buttonLink: '/products?category=1',
+      gradient: 'from-green-600 to-blue-600'
+    },
+    {
+      id: 3,
+      title: 'Spor & Outdoor',
+      subtitle: 'Aktif yaşam için en iyi ürünler',
+      image: '/banner3.jpg',
+      buttonText: 'Spor Ürünleri',
+      buttonLink: '/products?category=4',
+      gradient: 'from-orange-600 to-red-600'
+    }
+  ];
 
   const featuredProducts: Product[] = [
     {
@@ -318,9 +353,6 @@ export default function Home() {
           <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
             Ana Sayfa
           </Link>
-          <Link href="/categories" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-            Kategoriler
-          </Link>
           <Link href="/products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
             Ürünler
           </Link>
@@ -372,10 +404,7 @@ export default function Home() {
             <HomeIcon className="text-lg mb-1" />
             <span>Ana Sayfa</span>
           </Link>
-          <Link href="/categories" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <CategoryIcon className="text-lg mb-1" />
-            <span>Kategoriler</span>
-          </Link>
+
           <Link href="/products" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
             <ShoppingIcon className="text-lg mb-1" />
             <span>Ürünler</span>
@@ -398,9 +427,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center">
+      {/* Hero Section with Carousel */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="text-center mb-12">
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
             MelikShop'a
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Hoş Geldiniz</span>
@@ -409,40 +438,43 @@ export default function Home() {
             En kaliteli ürünleri en uygun fiyatlarla bulabileceğiniz online alışveriş platformu. 
             Güvenli ödeme ve hızlı teslimat garantisi ile alışverişin keyfini çıkarın.
           </p>
-          
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="flex">
-              <Input
-                placeholder="Ürün ara..."
-                size="lg"
-                suffix={<SearchIcon />}
-                className="flex-1"
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-center space-x-4">
-            <Link href="/products">
-              <GradientButton 
-                variant="blue-purple"
-                size="lg"
-                icon={<ShoppingIcon />}
-                className="text-lg h-12 px-8"
-              >
-                Alışverişe Başla
-              </GradientButton>
-            </Link>
-            <Link href="/categories">
-              <GradientButton 
-                variant="green-blue"
-                size="lg"
-                className="text-lg h-12 px-8"
-              >
-                Kategorileri Keşfet
-              </GradientButton>
-            </Link>
-          </div>
+        </div>
+
+        {/* Carousel */}
+        <div className="mb-16">
+          <Swiper
+            modules={[Navigation, Pagination, Autoplay]}
+            spaceBetween={30}
+            slidesPerView={1}
+            navigation
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            loop={true}
+            className="hero-carousel"
+          >
+            {banners.map((banner) => (
+              <SwiperSlide key={banner.id}>
+                <div className={`relative h-96 md:h-[500px] rounded-3xl overflow-hidden bg-gradient-to-r ${banner.gradient}`}>
+                  <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+                  <div className="relative z-10 flex items-center justify-center h-full">
+                    <div className="text-center text-white px-8">
+                      <h2 className="text-4xl md:text-6xl font-bold mb-4">{banner.title}</h2>
+                      <p className="text-xl md:text-2xl mb-8 opacity-90">{banner.subtitle}</p>
+                      <Link href={banner.buttonLink}>
+                        <GradientButton 
+                          variant="purple-pink"
+                          size="lg"
+                          className="text-lg h-12 px-8 bg-white text-gray-900 hover:bg-gray-100"
+                        >
+                          {banner.buttonText}
+                        </GradientButton>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
       </div>
 
@@ -457,7 +489,7 @@ export default function Home() {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
           {categories.map((category) => (
-            <Link href={`/categories/${category.id}`} key={category.id}>
+            <Link href={`/products?category=${category.id}`} key={category.id}>
               <Card 
                 hoverable 
                 className="h-full text-center transition-all duration-300 hover:scale-105"
