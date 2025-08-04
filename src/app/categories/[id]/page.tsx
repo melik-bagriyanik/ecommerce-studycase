@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
-import Input from '../components/ui/Input';
-import Badge from '../components/ui/Badge';
-import Tag from '../components/ui/Tag';
-import Rate from '../components/ui/Rate';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import Input from '../../components/ui/Input';
+import Badge from '../../components/ui/Badge';
+import Tag from '../../components/ui/Tag';
+import Rate from '../../components/ui/Rate';
 import { 
   ShoppingCartIcon, 
   UserIcon, 
@@ -21,10 +21,11 @@ import {
   ListIcon,
   StarIcon,
   FireIcon,
-  ClockIcon
-} from '../components/icons/index';
-import CartSidebar from '../components/CartSidebar';
-import GradientButton from '../components/GradientButton';
+  ClockIcon,
+  ArrowLeftIcon
+} from '../../components/icons/index';
+import CartSidebar from '../../components/CartSidebar';
+import GradientButton from '../../components/GradientButton';
 
 interface Product {
   id: number;
@@ -41,13 +42,75 @@ interface Product {
   isPopular?: boolean;
 }
 
-function ProductsContent() {
-  const searchParams = useSearchParams();
-  const categoryId = searchParams.get('category');
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+  productCount: number;
+  icon: React.ReactNode;
+  color: string;
+}
+
+function CategoryContent() {
+  const params = useParams();
+  const categoryId = parseInt(params.id as string);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   
+  const categories: Category[] = [
+    {
+      id: 1,
+      name: 'Electronics',
+      description: 'Latest gadgets and tech',
+      productCount: 245,
+      icon: <ShoppingIcon />,
+      color: 'from-blue-600 to-purple-600'
+    },
+    {
+      id: 2,
+      name: 'Clothing',
+      description: 'Fashion and accessories',
+      productCount: 189,
+      icon: <CategoryIcon />,
+      color: 'from-green-600 to-blue-600'
+    },
+    {
+      id: 3,
+      name: 'Home & Garden',
+      description: 'Home decor and garden',
+      productCount: 156,
+      icon: <HomeIcon />,
+      color: 'from-orange-600 to-red-600'
+    },
+    {
+      id: 4,
+      name: 'Sports',
+      description: 'Sports equipment',
+      productCount: 98,
+      icon: <StarIcon />,
+      color: 'from-purple-600 to-pink-600'
+    },
+    {
+      id: 5,
+      name: 'Books',
+      description: 'Books and literature',
+      productCount: 312,
+      icon: <CategoryIcon />,
+      color: 'from-indigo-600 to-purple-600'
+    },
+    {
+      id: 6,
+      name: 'Health & Beauty',
+      description: 'Beauty and wellness',
+      productCount: 134,
+      icon: <StarIcon />,
+      color: 'from-pink-600 to-rose-600'
+    }
+  ];
+
+  const currentCategory = categories.find(cat => cat.id === categoryId);
+
   const [products, setProducts] = useState<Product[]>([
     {
       id: 1,
@@ -101,6 +164,28 @@ function ProductsContent() {
     },
     {
       id: 5,
+      name: 'IKEA Malm Yatak Odası Takımı',
+      price: 599.99,
+      image: '/ikea.jpg',
+      category: 3,
+      rating: 4.5,
+      reviewCount: 234,
+      description: 'Modern ve fonksiyonel yatak odası takımı',
+      inStock: true
+    },
+    {
+      id: 6,
+      name: 'Wilson Tennis Racket',
+      price: 89.99,
+      image: '/wilson.jpg',
+      category: 4,
+      rating: 4.4,
+      reviewCount: 123,
+      description: 'Profesyonel tenis raketi',
+      inStock: true
+    },
+    {
+      id: 7,
       name: 'Harry Potter Complete Set',
       price: 79.99,
       originalPrice: 99.99,
@@ -113,7 +198,18 @@ function ProductsContent() {
       isPopular: true
     },
     {
-      id: 6,
+      id: 8,
+      name: 'L\'Oreal Paris Skincare Set',
+      price: 49.99,
+      image: '/loreal.jpg',
+      category: 6,
+      rating: 4.3,
+      reviewCount: 445,
+      description: 'Cilt bakım seti - nemlendirici ve temizleyici',
+      inStock: true
+    },
+    {
+      id: 9,
       name: 'LEGO Star Wars Millennium Falcon',
       price: 159.99,
       image: '/lego.jpg',
@@ -125,7 +221,7 @@ function ProductsContent() {
       isPopular: true
     },
     {
-      id: 7,
+      id: 10,
       name: 'Organic Honey 500g',
       price: 12.99,
       image: '/honey.jpg',
@@ -134,42 +230,44 @@ function ProductsContent() {
       reviewCount: 234,
       description: 'Doğal organik bal',
       inStock: true
+    },
+    {
+      id: 11,
+      name: 'MacBook Pro M3',
+      price: 1999.99,
+      image: '/macbook.jpg',
+      category: 1,
+      rating: 4.9,
+      reviewCount: 567,
+      description: 'Güçlü M3 işlemci ile MacBook Pro',
+      inStock: true,
+      isNew: true
+    },
+    {
+      id: 12,
+      name: 'Sony WH-1000XM5',
+      price: 349.99,
+      image: '/sony.jpg',
+      category: 1,
+      rating: 4.8,
+      reviewCount: 234,
+      description: 'Gürültü önleyici kablosuz kulaklık',
+      inStock: true,
+      isNew: true
     }
   ]);
 
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'rating' | 'newest'>('name');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
   const [showInStockOnly, setShowInStockOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
 
-  const categories = [
-    { id: 1, name: 'Electronics' },
-    { id: 2, name: 'Clothing' },
-    { id: 3, name: 'Home & Garden' },
-    { id: 4, name: 'Sports' },
-    { id: 5, name: 'Books' },
-    { id: 6, name: 'Health & Beauty' },
-    { id: 7, name: 'Toys' },
-    { id: 8, name: 'Food' }
-  ];
-
   useEffect(() => {
-    let filtered = [...products];
-
-    // Filter by category from URL
-    if (categoryId) {
-      filtered = filtered.filter(product => product.category === parseInt(categoryId));
-    }
-
-    // Filter by selected categories
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter(product => selectedCategories.includes(product.category));
-    }
+    let filtered = products.filter(product => product.category === categoryId);
 
     // Filter by search query
     if (searchQuery) {
@@ -212,7 +310,7 @@ function ProductsContent() {
 
     setFilteredProducts(filtered);
     setCurrentPage(1);
-  }, [products, categoryId, sortBy, priceRange, showInStockOnly, searchQuery, selectedCategories, selectedRatings]);
+  }, [products, categoryId, sortBy, priceRange, showInStockOnly, searchQuery, selectedRatings]);
 
   const addToCart = (productId: number) => {
     console.log(`Added product ${productId} to cart`);
@@ -290,7 +388,7 @@ function ProductsContent() {
   );
 
   const ProductListItem = ({ product }: { product: Product }) => (
-    <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
+    <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm">
       <div className="flex items-center space-x-4">
         <div className="relative w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center">
@@ -302,17 +400,17 @@ function ProductsContent() {
             </Tag>
           )}
         </div>
-        <div className="flex flex-col">
-          <h3 className="text-lg">{product.name}</h3>
+        <div>
+          <h3 className="text-lg font-semibold">{product.name}</h3>
           {product.isPopular && <Tag color="red">Popular</Tag>}
           {product.originalPrice && <Tag color="blue">Sale</Tag>}
-          {!product.inStock && <Tag color="gray">Out of Stock</Tag>}
+                     {!product.inStock && <Tag color="gray">Out of Stock</Tag>}
         </div>
       </div>
       <div className="flex items-center space-x-4">
-        <Rate disabled value={product.rating} />
+        <Rate disabled defaultValue={product.rating} />
         <span className="text-xs text-gray-500">({product.reviewCount})</span>
-        <span className="text-lg">${product.price}</span>
+        <h4 className="text-lg">${product.price}</h4>
         {product.originalPrice && (
           <span className="ml-2 text-sm text-gray-500 line-through">
             ${product.originalPrice}
@@ -326,6 +424,21 @@ function ProductsContent() {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  if (!currentCategory) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900">Kategori Bulunamadı</h2>
+          <Link href="/categories">
+            <GradientButton variant="blue-purple">
+              Kategorilere Dön
+            </GradientButton>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -341,10 +454,10 @@ function ProductsContent() {
           <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
             Ana Sayfa
           </Link>
-          <Link href="/categories" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+          <Link href="/categories" className="text-blue-600 font-medium transition-colors">
             Kategoriler
           </Link>
-          <Link href="/products" className="text-blue-600 font-medium transition-colors">
+          <Link href="/products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
             Ürünler
           </Link>
         </div>
@@ -357,7 +470,7 @@ function ProductsContent() {
           <Link href="/login">
             <GradientButton 
               variant="blue-purple"
-              size="lg"
+              size="large"
             >
               Get Started
             </GradientButton>
@@ -365,25 +478,21 @@ function ProductsContent() {
           
           {/* Shopping Cart Icon */}
           <Button 
-            variant="ghost"
+            type="text"
             icon={<ShoppingCartIcon />}
             onClick={() => setIsCartOpen(true)}
             className="relative hover:text-blue-600"
           >
-            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
-              <span></span>
-            </Badge>
+            <Badge count={3} size="small" className="absolute -top-1 -right-1" />
           </Button>
           
           {/* Profile Icon */}
           <Link href="/profile">
             <Button 
-              variant="ghost"
+              type="text" 
               icon={<UserIcon />}
               className="hover:text-blue-600"
-            >
-              Profil
-            </Button>
+            />
           </Link>
         </div>
       </nav>
@@ -395,24 +504,22 @@ function ProductsContent() {
             <HomeIcon className="text-lg mb-1" />
             <span>Ana Sayfa</span>
           </Link>
-          <Link href="/categories" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
+          <Link href="/categories" className="flex flex-col items-center text-xs text-blue-600">
             <CategoryIcon className="text-lg mb-1" />
             <span>Kategoriler</span>
           </Link>
-          <Link href="/products" className="flex flex-col items-center text-xs text-blue-600">
+          <Link href="/products" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
             <ShoppingIcon className="text-lg mb-1" />
             <span>Ürünler</span>
           </Link>
           <Button 
-            variant="ghost"
+            type="text"
             className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600 relative"
             onClick={() => setIsCartOpen(true)}
           >
             <ShoppingCartIcon className="text-lg mb-1" />
             <span>Sepetim</span>
-            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
-              <span></span>
-            </Badge>
+            <Badge count={3} size="small" className="absolute -top-1 -right-1" />
           </Button>
           <Link href="/profile" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
             <UserIcon className="text-lg mb-1" />
@@ -421,28 +528,46 @@ function ProductsContent() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Header */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Ürünler</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Binlerce kaliteli ürün arasından seçiminizi yapın. Filtreleme ve sıralama seçenekleri ile istediğiniz ürünü kolayca bulun.
-          </p>
+        <div className="mb-8">
+          <Link href="/categories">
+            <Button 
+              type="text" 
+              icon={<ArrowLeftIcon />}
+              className="mb-4"
+            >
+              Kategorilere Dön
+            </Button>
+          </Link>
+          
+          <div className="flex items-center space-x-4 mb-6">
+            <div className={`w-16 h-16 bg-gradient-to-r ${currentCategory.color} rounded-lg flex items-center justify-center`}>
+              <div className="text-white text-3xl">
+                {currentCategory.icon}
+              </div>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold mb-2">{currentCategory.name}</h1>
+              <p className="text-lg text-gray-700 mb-2">{currentCategory.description}</p>
+              <span className="text-sm text-gray-500">{filteredProducts.length} ürün bulundu</span>
+            </div>
+          </div>
         </div>
 
         {/* Search and Filters Bar */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="col-span-1 md:col-span-2">
+            <div>
               <Input
                 placeholder="Ürün ara..."
-                size="lg"
+                size="large"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 prefix={<SearchIcon />}
               />
             </div>
-            <div className="col-span-1 md:col-span-1">
+            <div>
               <select
                 className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={sortBy}
@@ -454,9 +579,9 @@ function ProductsContent() {
                 <option value="newest">En yeni</option>
               </select>
             </div>
-            <div className="col-span-1 md:col-span-1">
+            <div>
               <Button
-                size="lg"
+                size="large"
                 icon={<FilterIcon />}
                 onClick={() => setShowFilters(true)}
                 className="w-full"
@@ -464,26 +589,16 @@ function ProductsContent() {
                 Filtreler
               </Button>
             </div>
-            <div className="col-span-1 md:col-span-1">
-              <div className="flex border border-gray-300 rounded-lg overflow-hidden">
-                <button
-                  className={`flex-1 p-3 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'} hover:bg-blue-50 transition-colors`}
-                  onClick={() => setViewMode('grid')}
-                >
-                  <GridIcon />
-                </button>
-                <button
-                  className={`flex-1 p-3 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'} hover:bg-blue-50 transition-colors`}
-                  onClick={() => setViewMode('list')}
-                >
-                  <ListIcon />
-                </button>
-              </div>
+            <div className="flex items-center justify-end">
+              <button
+                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {viewMode === 'grid' ? <GridIcon /> : <ListIcon />}
+              </button>
             </div>
-            <div className="col-span-1 md:col-span-1 text-center">
-              <p className="text-sm text-gray-500">
-                {filteredProducts.length} ürün bulundu
-              </p>
+            <div className="col-span-full md:col-span-1 text-right">
+              <span className="text-sm text-gray-500">{filteredProducts.length} ürün bulundu</span>
             </div>
           </div>
         </div>
@@ -492,99 +607,72 @@ function ProductsContent() {
         {paginatedProducts.length > 0 ? (
           <>
             {viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <div key={product.id} className="bg-white rounded-lg shadow-md">
+                    <ProductCard product={product} />
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-lg">
-                {paginatedProducts.map((product) => (
-                  <ProductListItem key={product.id} product={product} />
-                ))}
+              <div className="bg-white rounded-lg shadow-md">
+                <ul className="divide-y divide-gray-200">
+                  {paginatedProducts.map((product) => (
+                    <li key={product.id}>
+                      <ProductListItem product={product} />
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
             {/* Pagination */}
             <div className="text-center mt-8">
-              <div className="flex items-center justify-center space-x-2">
-                <Button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="p-2 rounded-full hover:bg-gray-200"
-                >
-                  &lt;
-                </Button>
-                {Array.from({ length: Math.ceil(filteredProducts.length / pageSize) }).map((_, index) => (
-                  <Button
-                    key={index + 1}
-                    onClick={() => setCurrentPage(index + 1)}
-                    className={`p-2 rounded-full hover:bg-gray-200 ${currentPage === index + 1 ? 'bg-blue-600 text-white' : ''}`}
-                  >
-                    {index + 1}
-                  </Button>
-                ))}
-                <Button
-                  onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredProducts.length / pageSize), prev + 1))}
-                  disabled={currentPage === Math.ceil(filteredProducts.length / pageSize) || filteredProducts.length === 0}
-                  className="p-2 rounded-full hover:bg-gray-200"
-                >
-                  &gt;
-                </Button>
-              </div>
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span className="mx-2 text-gray-700">
+                Page {currentPage} of {Math.ceil(filteredProducts.length / pageSize)}
+              </span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredProducts.length / pageSize), prev + 1))}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                disabled={currentPage === Math.ceil(filteredProducts.length / pageSize)}
+              >
+                Next
+              </button>
             </div>
           </>
         ) : (
           <div className="py-12 text-center">
-            <h3 className="text-lg text-gray-600">Ürün bulunamadı</h3>
-            <p className="text-sm text-gray-500">Lütfen farklı filtrelerle tekrar deneyin.</p>
+            <h3 className="text-lg text-gray-500">Bu kategoride ürün bulunamadı</h3>
           </div>
         )}
       </div>
 
       {/* Filters Drawer */}
-      <div className={`fixed inset-0 z-50 md:hidden bg-black bg-opacity-50 ${showFilters ? 'block' : 'hidden'}`}>
+      <div className={`fixed inset-0 z-40 md:hidden bg-black bg-opacity-50 ${showFilters ? 'block' : 'hidden'}`}>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
             <h2 className="text-2xl font-bold mb-4">Filtreler</h2>
             <div className="space-y-4">
-              {/* Categories */}
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Kategoriler</h3>
-                <div className="flex flex-col space-y-2">
-                  {categories.map((category) => (
-                    <label key={category.id} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        value={category.id}
-                        checked={selectedCategories.includes(category.id)}
-                        onChange={(e) => {
-                          const newSelected = e.target.checked
-                            ? [...selectedCategories, category.id]
-                            : selectedCategories.filter(id => id !== category.id);
-                          setSelectedCategories(newSelected);
-                        }}
-                        className="mr-2"
-                      />
-                      {category.name}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               {/* Price Range */}
               <div>
                 <h3 className="text-lg font-semibold mb-2">Fiyat Aralığı</h3>
-                <div className="flex items-center space-x-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="2000"
+                  value={priceRange[0]}
+                  onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-sm text-gray-500 mt-2">
                   <span>${priceRange[0]}</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="2000"
-                    value={priceRange[0]}
-                    onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
-                    className="flex-1"
-                  />
                   <span>${priceRange[1]}</span>
                 </div>
               </div>
@@ -592,56 +680,64 @@ function ProductsContent() {
               {/* Ratings */}
               <div>
                 <h3 className="text-lg font-semibold mb-2">Değerlendirmeler</h3>
-                <div className="flex flex-col space-y-2">
+                <div className="space-y-2">
                   {[5, 4, 3, 2, 1].map((rating) => (
-                    <label key={rating} className="flex items-center">
+                    <div key={rating} className="flex items-center">
                       <input
                         type="checkbox"
+                        id={`rating-${rating}`}
                         value={rating}
                         checked={selectedRatings.includes(rating)}
                         onChange={(e) => {
-                          const newSelected = e.target.checked
-                            ? [...selectedRatings, rating]
-                            : selectedRatings.filter(r => r !== rating);
-                          setSelectedRatings(newSelected);
+                          const newRatings = selectedRatings.includes(rating)
+                            ? selectedRatings.filter(r => r !== rating)
+                            : [...selectedRatings, rating];
+                          setSelectedRatings(newRatings);
                         }}
                         className="mr-2"
                       />
-                      <Rate disabled value={rating} />
-                      <span className="ml-2">{rating}+ yıldız</span>
-                    </label>
+                      <label htmlFor={`rating-${rating}`} className="text-sm text-gray-700">
+                        <Rate disabled defaultValue={rating} />
+                        <span className="ml-2">{rating}+ yıldız</span>
+                      </label>
+                    </div>
                   ))}
                 </div>
               </div>
 
               {/* Stock Filter */}
               <div>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={showInStockOnly}
-                    onChange={(e) => setShowInStockOnly(e.target.checked)}
-                    className="mr-2"
-                  />
+                <input
+                  type="checkbox"
+                  id="inStockOnly"
+                  checked={showInStockOnly}
+                  onChange={(e) => setShowInStockOnly(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="inStockOnly" className="text-sm text-gray-700">
                   Sadece stokta olanlar
                 </label>
               </div>
 
               {/* Clear Filters */}
-              <Button
-                variant="outline"
+              <button
                 onClick={() => {
-                  setSelectedCategories([]);
                   setSelectedRatings([]);
                   setPriceRange([0, 2000]);
                   setShowInStockOnly(false);
                   setSearchQuery('');
                 }}
-                className="w-full"
+                className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
                 Filtreleri Temizle
-              </Button>
+              </button>
             </div>
+            <button
+              onClick={() => setShowFilters(false)}
+              className="mt-6 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+            >
+              Kapat
+            </button>
           </div>
         </div>
       </div>
@@ -672,17 +768,17 @@ function ProductsContent() {
   );
 }
 
-export default function ProductsPage() {
+export default function CategoryPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Yükleniyor...</h2>
-          <p className="text-sm text-gray-600">Ürünler yükleniyor, lütfen bekleyin.</p>
+          <h2 className="text-2xl font-bold text-gray-900">Yükleniyor...</h2>
+          <p className="text-lg text-gray-700">Kategori yükleniyor, lütfen bekleyin.</p>
         </div>
       </div>
     }>
-      <ProductsContent />
+      <CategoryContent />
     </Suspense>
   );
 } 

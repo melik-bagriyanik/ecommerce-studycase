@@ -3,10 +3,306 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from 'react';
+import Button from './components/ui/Button';
+import Card from './components/ui/Card';
+import Input from './components/ui/Input';
+import Badge from './components/ui/Badge';
+import Tag from './components/ui/Tag';
+import Rate from './components/ui/Rate';
+import { 
+  ShoppingCartIcon, 
+  UserIcon, 
+  HomeIcon,
+  CategoryIcon,
+  ShoppingIcon,
+  StarIcon,
+  SafetyIcon,
+  CustomerServiceIcon,
+  MailIcon,
+  FireIcon,
+  ClockIcon,
+  SearchIcon
+} from './components/icons/index';
 import CartSidebar from './components/CartSidebar';
+import GradientButton from './components/GradientButton';
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  rating: number;
+  reviewCount: number;
+  image: string;
+  category: string;
+  isNew?: boolean;
+  isPopular?: boolean;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+  productCount: number;
+  icon: React.ReactNode;
+  color: string;
+}
 
 export default function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+
+  const featuredProducts: Product[] = [
+    {
+      id: 1,
+      name: 'iPhone 15 Pro Max',
+      price: 1199.99,
+      originalPrice: 1299.99,
+      rating: 4.8,
+      reviewCount: 1247,
+      image: '/iphone.jpg',
+      category: 'Electronics',
+      isPopular: true
+    },
+    {
+      id: 2,
+      name: 'Samsung Galaxy S24 Ultra',
+      price: 1099.99,
+      rating: 4.7,
+      reviewCount: 892,
+      image: '/samsung.jpg',
+      category: 'Electronics',
+      isNew: true
+    },
+    {
+      id: 3,
+      name: 'Nike Air Max 270',
+      price: 129.99,
+      originalPrice: 159.99,
+      rating: 4.6,
+      reviewCount: 456,
+      image: '/nike.jpg',
+      category: 'Clothing',
+      isPopular: true
+    },
+    {
+      id: 4,
+      name: 'MacBook Pro M3',
+      price: 1999.99,
+      rating: 4.9,
+      reviewCount: 678,
+      image: '/macbook.jpg',
+      category: 'Electronics',
+      isNew: true
+    }
+  ];
+
+  const newArrivals: Product[] = [
+    {
+      id: 5,
+      name: 'Sony WH-1000XM5',
+      price: 349.99,
+      rating: 4.8,
+      reviewCount: 234,
+      image: '/sony.jpg',
+      category: 'Electronics',
+      isNew: true
+    },
+    {
+      id: 6,
+      name: 'Adidas Ultraboost 22',
+      price: 189.99,
+      rating: 4.7,
+      reviewCount: 123,
+      image: '/adidas.jpg',
+      category: 'Clothing',
+      isNew: true
+    },
+    {
+      id: 7,
+      name: 'Apple Watch Series 9',
+      price: 399.99,
+      rating: 4.9,
+      reviewCount: 567,
+      image: '/applewatch.jpg',
+      category: 'Electronics',
+      isNew: true
+    },
+    {
+      id: 8,
+      name: 'Dell XPS 13',
+      price: 1299.99,
+      rating: 4.6,
+      reviewCount: 89,
+      image: '/dell.jpg',
+      category: 'Electronics',
+      isNew: true
+    }
+  ];
+
+  const popularProducts: Product[] = [
+    {
+      id: 9,
+      name: 'Harry Potter Complete Set',
+      price: 79.99,
+      originalPrice: 99.99,
+      rating: 4.9,
+      reviewCount: 2156,
+      image: '/harry-potter.jpg',
+      category: 'Books',
+      isPopular: true
+    },
+    {
+      id: 10,
+      name: 'L\'Oreal Paris Skincare Set',
+      price: 49.99,
+      rating: 4.3,
+      reviewCount: 445,
+      image: '/loreal.jpg',
+      category: 'Health and Beauty',
+      isPopular: true
+    },
+    {
+      id: 11,
+      name: 'LEGO Star Wars Millennium Falcon',
+      price: 159.99,
+      rating: 4.8,
+      reviewCount: 789,
+      image: '/lego.jpg',
+      category: 'Toys',
+      isPopular: true
+    },
+    {
+      id: 12,
+      name: 'Organic Honey 500g',
+      price: 12.99,
+      rating: 4.6,
+      reviewCount: 234,
+      image: '/honey.jpg',
+      category: 'Food',
+      isPopular: true
+    }
+  ];
+
+  const categories: Category[] = [
+    {
+      id: 1,
+      name: 'Electronics',
+      description: 'Latest gadgets and tech',
+      productCount: 245,
+      icon: <ShoppingIcon />,
+      color: 'from-blue-600 to-purple-600'
+    },
+    {
+      id: 2,
+      name: 'Clothing',
+      description: 'Fashion and accessories',
+      productCount: 189,
+      icon: <CategoryIcon />,
+      color: 'from-green-600 to-blue-600'
+    },
+    {
+      id: 3,
+      name: 'Home & Garden',
+      description: 'Home decor and garden',
+      productCount: 156,
+      icon: <HomeIcon />,
+      color: 'from-orange-600 to-red-600'
+    },
+    {
+      id: 4,
+      name: 'Sports',
+      description: 'Sports equipment',
+      productCount: 98,
+      icon: <StarIcon />,
+      color: 'from-purple-600 to-pink-600'
+    },
+    {
+      id: 5,
+      name: 'Books',
+      description: 'Books and literature',
+      productCount: 312,
+      icon: <CustomerServiceIcon />,
+      color: 'from-indigo-600 to-purple-600'
+    },
+    {
+      id: 6,
+      name: 'Health & Beauty',
+      description: 'Beauty and wellness',
+      productCount: 134,
+      icon: <SafetyIcon />,
+      color: 'from-pink-600 to-rose-600'
+    }
+  ];
+
+  const handleNewsletterSignup = () => {
+    if (newsletterEmail) {
+      alert(`Thank you! ${newsletterEmail} has been subscribed to our newsletter.`);
+      setNewsletterEmail('');
+    }
+  };
+
+  const ProductCard = ({ product }: { product: Product }) => (
+    <Card 
+      hoverable 
+      className="h-full"
+      cover={
+        <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <ShoppingIcon className="text-white text-xl" />
+          </div>
+          {product.isNew && (
+            <Tag color="green" className="absolute top-2 left-2">
+              <ClockIcon /> New
+            </Tag>
+          )}
+          {product.isPopular && (
+            <Tag color="red" className="absolute top-2 left-2">
+              <FireIcon /> Popular
+            </Tag>
+          )}
+          {product.originalPrice && (
+            <Tag color="blue" className="absolute top-2 right-2">
+              Sale
+            </Tag>
+          )}
+        </div>
+      }
+      actions={[
+        <GradientButton 
+          key="add-to-cart" 
+          variant="blue-purple" 
+          size="sm"
+          onClick={() => alert(`Added ${product.name} to cart!`)}
+        >
+          Add to Cart
+        </GradientButton>
+      ]}
+    >
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-sm line-clamp-2">{product.name}</h3>
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Rate disabled value={product.rating} />
+            <span className="text-xs text-gray-500">({product.reviewCount})</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="font-semibold text-lg">${product.price}</span>
+              {product.originalPrice && (
+                <span className="line-through text-gray-500 ml-2">
+                  ${product.originalPrice}
+                </span>
+              )}
+            </div>
+            <span className="text-xs text-gray-500">{product.category}</span>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -35,31 +331,36 @@ export default function Home() {
           <Link href="/login" className="text-gray-600 hover:text-gray-900 transition-colors">
             Sign In
           </Link>
-          <Link 
-            href="/login" 
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all duration-200"
-          >
-            Get Started
+          <Link href="/login">
+            <GradientButton 
+              variant="blue-purple"
+              size="lg"
+            >
+              Get Started
+            </GradientButton>
           </Link>
           
           {/* Shopping Cart Icon */}
-          <button 
+          <Button 
+            variant="ghost"
+            icon={<ShoppingCartIcon />}
             onClick={() => setIsCartOpen(true)}
-            className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors"
+            className="relative hover:text-blue-600"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-            </svg>
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              3
-            </span>
-          </button>
+            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
+              <span></span>
+            </Badge>
+          </Button>
           
           {/* Profile Icon */}
-          <Link href="/profile" className="p-2 text-gray-600 hover:text-blue-600 transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+          <Link href="/profile">
+            <Button 
+              variant="ghost"
+              icon={<UserIcon />}
+              className="hover:text-blue-600"
+            >
+              Profil
+            </Button>
           </Link>
         </div>
       </nav>
@@ -68,39 +369,30 @@ export default function Home() {
       <div className="md:hidden bg-white border-t border-gray-200">
         <div className="flex items-center justify-around py-3">
           <Link href="/" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
+            <HomeIcon className="text-lg mb-1" />
             <span>Ana Sayfa</span>
           </Link>
           <Link href="/categories" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
+            <CategoryIcon className="text-lg mb-1" />
             <span>Kategoriler</span>
           </Link>
           <Link href="/products" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
+            <ShoppingIcon className="text-lg mb-1" />
             <span>Ürünler</span>
           </Link>
-          <button 
-            onClick={() => setIsCartOpen(true)}
+          <Button 
+            variant="ghost"
             className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600 relative"
+            onClick={() => setIsCartOpen(true)}
           >
-            <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-            </svg>
+            <ShoppingCartIcon className="text-lg mb-1" />
             <span>Sepetim</span>
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              3
-            </span>
-          </button>
+            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
+              <span></span>
+            </Badge>
+          </Button>
           <Link href="/profile" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            <UserIcon className="text-lg mb-1" />
             <span>Profilim</span>
           </Link>
         </div>
@@ -117,55 +409,206 @@ export default function Home() {
             En kaliteli ürünleri en uygun fiyatlarla bulabileceğiniz online alışveriş platformu. 
             Güvenli ödeme ve hızlı teslimat garantisi ile alışverişin keyfini çıkarın.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              href="/products" 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-            >
-              Alışverişe Başla
+          
+          {/* Search Bar */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="flex">
+              <Input
+                placeholder="Ürün ara..."
+                size="lg"
+                suffix={<SearchIcon />}
+                className="flex-1"
+              />
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-center space-x-4">
+            <Link href="/products">
+              <GradientButton 
+                variant="blue-purple"
+                size="lg"
+                icon={<ShoppingIcon />}
+                className="text-lg h-12 px-8"
+              >
+                Alışverişe Başla
+              </GradientButton>
             </Link>
-            <Link 
-              href="/categories" 
-              className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:border-gray-400 transition-colors"
-            >
-              Kategorileri Keşfet
+            <Link href="/categories">
+              <GradientButton 
+                variant="green-blue"
+                size="lg"
+                className="text-lg h-12 px-8"
+              >
+                Kategorileri Keşfet
+              </GradientButton>
             </Link>
           </div>
         </div>
+      </div>
+
+      {/* Categories Grid */}
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Kategoriler</h2>
+          <p className="text-lg text-gray-600">
+            İhtiyacınız olan ürünleri kategorilere göre keşfedin
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+          {categories.map((category) => (
+            <Link href={`/categories/${category.id}`} key={category.id}>
+              <Card 
+                hoverable 
+                className="h-full text-center transition-all duration-300 hover:scale-105"
+              >
+                <div className={`w-16 h-16 bg-gradient-to-r ${category.color} rounded-lg mx-auto mb-4 flex items-center justify-center`}>
+                  <div className="text-white text-2xl">
+                    {category.icon}
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{category.name}</h3>
+                <p className="text-gray-600 mb-4">
+                  {category.description}
+                </p>
+                <span className="text-gray-500">{category.productCount} ürün</span>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Featured Products */}
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Öne Çıkan Ürünler</h2>
+          <p className="text-lg text-gray-600">
+            En çok tercih edilen ürünlerimizi keşfedin
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {featuredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </div>
+
+      {/* New Arrivals */}
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Yeni Gelenler</h2>
+          <p className="text-lg text-gray-600">
+            En son eklenen ürünlerimizi keşfedin
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {newArrivals.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </div>
+
+      {/* Popular Products */}
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Popüler Ürünler</h2>
+          <p className="text-lg text-gray-600">
+            En çok satan ürünlerimizi keşfedin
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {popularProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </div>
+
+      {/* Newsletter Signup */}
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <Card 
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center border-0"
+        >
+          <div className="p-12">
+            <h2 className="text-3xl font-bold text-white mb-4">Bültenimize Katılın</h2>
+            <p className="text-xl mb-8 opacity-90 text-white">
+              En son ürünler ve özel fırsatlar hakkında bilgi alın
+            </p>
+            
+            <div className="max-w-md mx-auto">
+              <div className="flex w-full">
+                <Input
+                  size="lg"
+                  placeholder="E-posta adresiniz"
+                  prefix={<MailIcon />}
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  onPressEnter={handleNewsletterSignup}
+                  className="flex-1"
+                />
+                <GradientButton 
+                  variant="purple-pink"
+                  size="lg"
+                  onClick={handleNewsletterSignup}
+                  className="ml-2"
+                >
+                  Abone Ol
+                </GradientButton>
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
 
       {/* Features Section */}
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg mb-6"></div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Hızlı Teslimat</h3>
-            <p className="text-gray-600">Siparişleriniz 24 saat içinde kapınızda. Güvenli ve hızlı teslimat garantisi.</p>
-          </div>
-          <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg mb-6"></div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Güvenli Ödeme</h3>
-            <p className="text-gray-600">SSL sertifikalı güvenli ödeme sistemi ile güvenle alışveriş yapın.</p>
-          </div>
-          <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg mb-6"></div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">7/24 Destek</h3>
-            <p className="text-gray-600">Müşteri hizmetlerimiz her zaman yanınızda. Sorularınız için bize ulaşın.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="max-w-7xl mx-auto px-6 py-20">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">Alışverişe Başlamaya Hazır mısınız?</h2>
-          <p className="text-xl mb-8 opacity-90">Binlerce ürün arasından seçiminizi yapın</p>
-          <Link 
-            href="/products" 
-            className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
+          <Card 
+            hoverable 
+            className="shadow-lg hover:shadow-xl transition-shadow"
           >
-            Ürünleri İncele
-          </Link>
+            <div className="p-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg mb-6 flex items-center justify-center">
+                <StarIcon className="text-white text-xl" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">Hızlı Teslimat</h3>
+              <p className="text-gray-600">
+                Siparişleriniz 24 saat içinde kapınızda. Güvenli ve hızlı teslimat garantisi.
+              </p>
+            </div>
+          </Card>
+          
+          <Card 
+            hoverable 
+            className="shadow-lg hover:shadow-xl transition-shadow"
+          >
+            <div className="p-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg mb-6 flex items-center justify-center">
+                <SafetyIcon className="text-white text-xl" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">Güvenli Ödeme</h3>
+              <p className="text-gray-600">
+                SSL sertifikalı güvenli ödeme sistemi ile güvenle alışveriş yapın.
+              </p>
+            </div>
+          </Card>
+          
+          <Card 
+            hoverable 
+            className="shadow-lg hover:shadow-xl transition-shadow"
+          >
+            <div className="p-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg mb-6 flex items-center justify-center">
+                <CustomerServiceIcon className="text-white text-xl" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">7/24 Destek</h3>
+              <p className="text-gray-600">
+                Müşteri hizmetlerimiz her zaman yanınızda. Sorularınız için bize ulaşın.
+              </p>
+            </div>
+          </Card>
         </div>
       </div>
 
