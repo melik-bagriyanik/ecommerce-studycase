@@ -26,7 +26,8 @@ import {
   MailIcon,
   FireIcon,
   ClockIcon,
-  SearchIcon
+  SearchIcon,
+  ChartBarIcon
 } from './components/icons/index';
 import CartSidebar from './components/CartSidebar';
 import GradientButton from './components/GradientButton';
@@ -394,6 +395,17 @@ export default function Home() {
               Profil
             </Button>
           </Link>
+          
+          {/* Admin Icon */}
+          <Link href="/admin">
+            <Button 
+              variant="ghost"
+              icon={<ChartBarIcon />}
+              className="hover:text-blue-600"
+            >
+              Admin
+            </Button>
+          </Link>
         </div>
       </nav>
 
@@ -423,6 +435,10 @@ export default function Home() {
           <Link href="/dashboard" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
             <UserIcon className="text-lg mb-1" />
             <span>Profilim</span>
+          </Link>
+          <Link href="/admin" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
+            <ChartBarIcon className="text-lg mb-1" />
+            <span>Admin</span>
           </Link>
         </div>
       </div>
