@@ -385,7 +385,7 @@ export default function Home() {
           </Button>
           
           {/* Profile Icon */}
-          <Link href="/profile">
+          <Link href="/dashboard">
             <Button 
               variant="ghost"
               icon={<UserIcon />}
@@ -420,7 +420,7 @@ export default function Home() {
               <span></span>
             </Badge>
           </Button>
-          <Link href="/profile" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
+          <Link href="/dashboard" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
             <UserIcon className="text-lg mb-1" />
             <span>Profilim</span>
           </Link>

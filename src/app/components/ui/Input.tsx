@@ -2,6 +2,7 @@ import React from 'react';
 
 interface InputProps {
   label?: string;
+  name?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
@@ -18,6 +19,7 @@ interface InputProps {
 
 const Input: React.FC<InputProps> = ({
   label,
+  name,
   value,
   onChange,
   placeholder,
@@ -67,6 +69,7 @@ const Input: React.FC<InputProps> = ({
           </div>
         )}
         <input
+          name={name}
           type={type}
           value={value}
           onChange={onChange}
