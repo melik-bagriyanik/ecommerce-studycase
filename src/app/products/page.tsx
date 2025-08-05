@@ -226,73 +226,82 @@ function ProductsContent() {
   };
 
   const ProductCard = ({ product }: { product: Product }) => (
-    <Card 
-      hoverable 
-      className="h-full"
-      cover={
-        <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <ShoppingIcon className="text-white text-xl" />
-          </div>
-          {product.isNew && (
-            <Tag color="green" className="absolute top-2 left-2">
-              <ClockIcon /> New
-            </Tag>
-          )}
-          {product.isPopular && (
-            <Tag color="red" className="absolute top-2 left-2">
-              <FireIcon /> Popular
-            </Tag>
-          )}
-          {product.originalPrice && (
-            <Tag color="blue" className="absolute top-2 right-2">
-              Sale
-            </Tag>
-          )}
-          {!product.inStock && (
-            <Tag color="gray" className="absolute top-2 right-2">
-              Out of Stock
-            </Tag>
-          )}
-        </div>
-      }
-      actions={[
-        <GradientButton 
-          key="add-to-cart" 
-          variant="blue-purple" 
-          size="sm"
-          disabled={!product.inStock}
-          onClick={() => addToCart(product.id)}
-        >
-          {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-        </GradientButton>
-      ]}
-    >
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-sm line-clamp-2">{product.name}</h3>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Rate disabled value={product.rating} />
-            <span className="text-xs text-gray-500">({product.reviewCount})</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-lg">${product.price}</h4>
-              {product.originalPrice && (
-                <span className="ml-2 text-sm text-gray-500 line-through">
-                  ${product.originalPrice}
-                </span>
-              )}
+    <Link href={`/products/${product.id}`}>
+      <Card 
+        hoverable 
+        className="h-full"
+        cover={
+          <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <ShoppingIcon className="text-white text-xl" />
             </div>
-            <span className="text-xs text-gray-500">
-              {categories.find(cat => cat.id === product.category)?.name}
-            </span>
+            {product.isNew && (
+              <Tag color="green" className="absolute top-2 left-2">
+                <ClockIcon /> New
+              </Tag>
+            )}
+            {product.isPopular && (
+              <Tag color="red" className="absolute top-2 left-2">
+                <FireIcon /> Popular
+              </Tag>
+            )}
+            {product.originalPrice && (
+              <Tag color="blue" className="absolute top-2 right-2">
+                Sale
+              </Tag>
+            )}
+            {!product.inStock && (
+              <Tag color="gray" className="absolute top-2 right-2">
+                Out of Stock
+              </Tag>
+            )}
+          </div>
+        }
+        actions={[
+          <div 
+            key="add-to-cart"
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+              addToCart(product.id);
+            }}
+          >
+            <GradientButton 
+              variant="blue-purple" 
+              size="sm"
+              disabled={!product.inStock}
+            >
+              {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+            </GradientButton>
+          </div>
+        ]}
+      >
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-sm line-clamp-2">{product.name}</h3>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Rate disabled value={product.rating} />
+              <span className="text-xs text-gray-500">({product.reviewCount})</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-lg">${product.price}</h4>
+                {product.originalPrice && (
+                  <span className="ml-2 text-sm text-gray-500 line-through">
+                    ${product.originalPrice}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs text-gray-500">
+                {categories.find(cat => cat.id === product.category)?.name}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </Link>
   );
 
   const ProductListItem = ({ product }: { product: Product }) => (
