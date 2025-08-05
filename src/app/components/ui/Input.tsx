@@ -1,12 +1,14 @@
 import React from 'react';
 
 interface InputProps {
+  label?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
-  type?: 'text' | 'email' | 'password' | 'number' | 'search';
+  type?: 'text' | 'email' | 'password' | 'number' | 'search' | 'tel';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
+  required?: boolean;
   className?: string;
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
@@ -15,12 +17,14 @@ interface InputProps {
 }
 
 const Input: React.FC<InputProps> = ({
+  label,
   value,
   onChange,
   placeholder,
   type = 'text',
   size = 'md',
   disabled = false,
+  required = false,
   className = '',
   prefix,
   suffix,
@@ -49,26 +53,35 @@ const Input: React.FC<InputProps> = ({
   };
   
   return (
-    <div className="relative">
-      {prefix && (
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-          {prefix}
-        </div>
+    <div className="space-y-1">
+      {label && (
+        <label className="block text-sm font-medium text-gray-700">
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
       )}
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        disabled={disabled}
-        className={`${classes} ${prefix ? 'pl-10' : ''} ${suffix ? 'pr-10' : ''}`}
-        onKeyDown={handleKeyDown}
-      />
-      {suffix && (
-        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-          {suffix}
-        </div>
-      )}
+      <div className="relative">
+        {prefix && (
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            {prefix}
+          </div>
+        )}
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          disabled={disabled}
+          required={required}
+          className={`${classes} ${prefix ? 'pl-10' : ''} ${suffix ? 'pr-10' : ''}`}
+          onKeyDown={handleKeyDown}
+        />
+        {suffix && (
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            {suffix}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
