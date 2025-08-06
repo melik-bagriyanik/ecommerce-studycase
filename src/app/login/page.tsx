@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,11 +14,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Demo user credentials
-  const demoUser = {
-    email: 'demo@example.com',
-    password: 'demo123'
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -29,28 +25,44 @@ export default function LoginPage() {
     if (error) setError('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      // Check if credentials match demo user
-      if (formData.email === demoUser.email && formData.password === demoUser.password) {
-        console.log('Login successful:', formData.email);
-        // Store login state (in a real app, you'd store a JWT token)
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userEmail', formData.email);
-        
-        // Redirect to home page
-        router.push('/');
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
+
+  try {
+    const response = await axios.post('http://localhost:3000/api/auth/login', {
+      email: formData.email,
+      password: formData.password
+    });
+
+    console.log('Login response:', response.data);
+
+    if (response.data.success) {
+      const { user, token } = response.data.data;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('userEmail', user.email);
+
+      router.push('/');
+    } else {
+      setError(response.data.message || 'Giriş başarısız');
+    }
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
       } else {
-        setError('Email veya şifre hatalı. Demo kullanıcı: demo@example.com / demo123');
-        setIsLoading(false);
+        setError('Sunucuya bağlanılamadı');
       }
-    }, 1000);
-  };
+    } else {
+      setError('Bilinmeyen bir hata oluştu');
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">

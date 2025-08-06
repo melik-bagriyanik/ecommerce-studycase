@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -31,7 +31,7 @@ import {
 } from './components/icons/index';
 import CartSidebar from './components/CartSidebar';
 import GradientButton from './components/GradientButton';
-
+import Categories from './components/cateoriesList/CategoriesList';
 interface Product {
   id: number;
   name: string;
@@ -220,56 +220,6 @@ export default function Home() {
     }
   ];
 
-  const categories: Category[] = [
-    {
-      id: 1,
-      name: 'Electronics',
-      description: 'Latest gadgets and tech',
-      productCount: 245,
-      icon: <ShoppingIcon />,
-      color: 'from-blue-600 to-purple-600'
-    },
-    {
-      id: 2,
-      name: 'Clothing',
-      description: 'Fashion and accessories',
-      productCount: 189,
-      icon: <CategoryIcon />,
-      color: 'from-green-600 to-blue-600'
-    },
-    {
-      id: 3,
-      name: 'Home & Garden',
-      description: 'Home decor and garden',
-      productCount: 156,
-      icon: <HomeIcon />,
-      color: 'from-orange-600 to-red-600'
-    },
-    {
-      id: 4,
-      name: 'Sports',
-      description: 'Sports equipment',
-      productCount: 98,
-      icon: <StarIcon />,
-      color: 'from-purple-600 to-pink-600'
-    },
-    {
-      id: 5,
-      name: 'Books',
-      description: 'Books and literature',
-      productCount: 312,
-      icon: <CustomerServiceIcon />,
-      color: 'from-indigo-600 to-purple-600'
-    },
-    {
-      id: 6,
-      name: 'Health & Beauty',
-      description: 'Beauty and wellness',
-      productCount: 134,
-      icon: <SafetyIcon />,
-      color: 'from-pink-600 to-rose-600'
-    }
-  ];
 
   const handleNewsletterSignup = () => {
     if (newsletterEmail) {
@@ -503,27 +453,9 @@ export default function Home() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-          {categories.map((category) => (
-            <Link href={`/products?category=${category.id}`} key={category.id}>
-              <Card 
-                hoverable 
-                className="h-full text-center transition-all duration-300 hover:scale-105"
-              >
-                <div className={`w-16 h-16 bg-gradient-to-r ${category.color} rounded-lg mx-auto mb-4 flex items-center justify-center`}>
-                  <div className="text-white text-2xl">
-                    {category.icon}
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">{category.name}</h3>
-                <p className="text-gray-600 mb-4">
-                  {category.description}
-                </p>
-                <span className="text-gray-500">{category.productCount} ürün</span>
-              </Card>
-            </Link>
-          ))}
-        </div>
+       
+          <Categories />
+       
       </div>
 
       {/* Featured Products */}
