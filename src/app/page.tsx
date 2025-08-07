@@ -156,62 +156,63 @@ export default function Home() {
   };
 
   const ProductCard = ({ product }: { product: Product }) => (
-    <Card 
-      hoverable 
-      className="h-full"
-      cover={
-        <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <ShoppingIcon className="text-white text-xl" />
+    <Card hoverable className="h-full">
+      <div className="relative h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center">
+        {product.image ? (
+          <img 
+            src={product.image} 
+            alt={product.name}
+            className="w-full h-full object-cover rounded-t-lg"
+          />
+        ) : (
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <ShoppingIcon className="text-white text-lg" />
           </div>
-          {product.isNew && (
-            <Tag color="green" className="absolute top-2 left-2">
-              <ClockIcon /> New
-            </Tag>
-          )}
-          {product.isPopular && (
-            <Tag color="red" className="absolute top-2 left-2">
-              <FireIcon /> Popular
-            </Tag>
-          )}
-          {product.originalPrice && (
-            <Tag color="blue" className="absolute top-2 right-2">
-              Sale
-            </Tag>
-          )}
+        )}
+        {product.isNew && (
+          <Tag color="green" className="absolute top-2 left-2">
+            <ClockIcon /> New
+          </Tag>
+        )}
+        {product.isPopular && (
+          <Tag color="red" className="absolute top-2 left-2">
+            <FireIcon /> Popular
+          </Tag>
+        )}
+        {product.originalPrice && (
+          <Tag color="blue" className="absolute top-2 right-2">
+            Sale
+          </Tag>
+        )}
+      </div>
+      <div className="p-3">
+        <h3 className="font-semibold text-gray-900 mb-2 text-sm line-clamp-2">
+          {product.name}
+        </h3>
+        <div className="flex items-center space-x-2 mb-2">
+          <Rate disabled value={product.rating} />
+          <span className="text-xs text-gray-500">({product.reviewCount})</span>
         </div>
-      }
-      actions={[
-        <GradientButton 
-          key="add-to-cart" 
-          variant="blue-purple" 
-          size="sm"
-          onClick={() => addToCart(product)}
-        >
-          Add to Cart
-        </GradientButton>
-      ]}
-    >
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-sm line-clamp-2">{product.name}</h3>
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="font-semibold text-base">${product.price}</span>
+            {product.originalPrice && (
+              <span className="line-through text-gray-500 ml-2 text-sm">
+                ${product.originalPrice}
+              </span>
+            )}
+          </div>
+          <span className="text-xs text-gray-500">{product.category}</span>
         </div>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Rate disabled value={product.rating} />
-            <span className="text-xs text-gray-500">({product.reviewCount})</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="font-semibold text-lg">${product.price}</span>
-              {product.originalPrice && (
-                <span className="line-through text-gray-500 ml-2">
-                  ${product.originalPrice}
-                </span>
-              )}
-            </div>
-            <span className="text-xs text-gray-500">{product.category}</span>
-          </div>
+        <div className="mt-3">
+          <GradientButton 
+            variant="blue-purple" 
+            size="sm"
+            onClick={() => addToCart(product)}
+            className="w-full"
+          >
+            Add to Cart
+          </GradientButton>
         </div>
       </div>
     </Card>
@@ -435,20 +436,20 @@ export default function Home() {
         </div>
         
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {[...Array(4)].map((_, index) => (
               <Card key={index} className="h-full">
-                <div className="w-full h-48 bg-gray-200 rounded-t-lg animate-pulse"></div>
-                <div className="p-6">
-                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
-                  <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-full h-32 bg-gray-200 rounded-t-lg animate-pulse"></div>
+                <div className="p-3">
+                  <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
                 </div>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {popularProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -473,20 +474,20 @@ export default function Home() {
         </div>
         
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {[...Array(4)].map((_, index) => (
               <Card key={index} className="h-full">
-                <div className="w-full h-48 bg-gray-200 rounded-t-lg animate-pulse"></div>
-                <div className="p-6">
-                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
-                  <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-full h-32 bg-gray-200 rounded-t-lg animate-pulse"></div>
+                <div className="p-3">
+                  <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
                 </div>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {newProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
