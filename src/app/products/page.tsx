@@ -25,14 +25,15 @@ import {
 } from '../components/icons/index';
 import CartSidebar from '../components/CartSidebar';
 import GradientButton from '../components/GradientButton';
+import axios from 'axios';
 
 interface Product {
-  id: number;
+  id: number | string;
   name: string;
   price: number;
   originalPrice?: number;
   image: string;
-  category: number;
+  category: string; // string!
   rating: number;
   reviewCount: number;
   description: string;
@@ -41,6 +42,21 @@ interface Product {
   isPopular?: boolean;
 }
 
+// Kategori map'i ve ters map
+const categoryMap: Record<string, number> = {
+  'Electronics': 1,
+  'Clothing': 2,
+  'Home and Garden': 3,
+  'Sports': 4,
+  'Books': 5,
+  'Health and Beauty': 6,
+  'Toys': 7,
+  'Food': 8,
+};
+const reverseCategoryMap: Record<number, string> = Object.fromEntries(
+  Object.entries(categoryMap).map(([k, v]) => [v, k])
+);
+
 function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -48,97 +64,63 @@ function ProductsContent() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
-  
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: 1,
-      name: 'iPhone 15 Pro',
-      price: 899.99,
-      originalPrice: 999.99,
-      image: '/iphone.jpg',
-      category: 1,
-      rating: 4.8,
-      reviewCount: 1247,
-      description: 'En son teknoloji ile donatılmış akıllı telefon',
-      inStock: true,
-      isPopular: true
-    },
-    {
-      id: 2,
-      name: 'Samsung Galaxy S24',
-      price: 799.99,
-      image: '/samsung.jpg',
-      category: 1,
-      rating: 4.6,
-      reviewCount: 892,
-      description: 'Güçlü performans ve uzun pil ömrü',
-      inStock: true,
-      isNew: true
-    },
-    {
-      id: 3,
-      name: 'Nike Air Max 270',
-      price: 129.99,
-      originalPrice: 159.99,
-      image: '/nike.jpg',
-      category: 2,
-      rating: 4.7,
-      reviewCount: 456,
-      description: 'Konforlu ve şık spor ayakkabı',
-      inStock: true,
-      isPopular: true
-    },
-    {
-      id: 4,
-      name: 'Adidas Ultraboost 22',
-      price: 189.99,
-      image: '/adidas.jpg',
-      category: 2,
-      rating: 4.9,
-      reviewCount: 678,
-      description: 'Profesyonel koşu ayakkabısı',
-      inStock: false,
-      isNew: true
-    },
-    {
-      id: 5,
-      name: 'Harry Potter Complete Set',
-      price: 79.99,
-      originalPrice: 99.99,
-      image: '/harry-potter.jpg',
-      category: 5,
-      rating: 4.9,
-      reviewCount: 2156,
-      description: 'J.K. Rowling\'in tüm Harry Potter serisi',
-      inStock: true,
-      isPopular: true
-    },
-    {
-      id: 6,
-      name: 'LEGO Star Wars Millennium Falcon',
-      price: 159.99,
-      image: '/lego.jpg',
-      category: 7,
-      rating: 4.8,
-      reviewCount: 789,
-      description: 'Detaylı Star Wars LEGO seti',
-      inStock: true,
-      isPopular: true
-    },
-    {
-      id: 7,
-      name: 'Organic Honey 500g',
-      price: 12.99,
-      image: '/honey.jpg',
-      category: 8,
-      rating: 4.6,
-      reviewCount: 234,
-      description: 'Doğal organik bal',
-      inStock: true
-    }
-  ]);
 
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Kategorileri frontend'den üret
+  const categories = Object.entries(categoryMap).map(([name, id]) => ({ id, name }));
+
+  // API'den ürünleri çek
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:3000/api/products", {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        });
+
+        const apiProducts = Array.isArray(response.data.data?.products)
+          ? response.data.data.products
+          : [];
+
+        const mappedProducts = apiProducts.map((item: any) => ({
+          id: item.id || item._id,
+          name: item.name,
+          price: item.price,
+          originalPrice: item.originalPrice,
+          image: item.thumbnail || (item.images && item.images[0]) || '',
+          category: item.category, // string olarak bırak!
+          rating: item.rating || 0,
+          reviewCount: item.reviewCount || 0,
+          description: item.description || '',
+          inStock: typeof item.stock === 'number' ? item.stock > 0 : true,
+          isNew: item.isNew,
+          isPopular: item.isPopular,
+        }));
+
+        setProducts(mappedProducts);
+      } catch (err: any) {
+        console.error('Error fetching products:', err);
+        setError(err.response?.data?.message || 'Ürünler yüklenirken bir hata oluştu');
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Filtre state'leri
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'rating' | 'newest'>('name');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
   const [showInStockOnly, setShowInStockOnly] = useState(false);
@@ -148,36 +130,28 @@ function ProductsContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
 
-  const categories = [
-    { id: 1, name: 'Electronics' },
-    { id: 2, name: 'Clothing' },
-    { id: 3, name: 'Home & Garden' },
-    { id: 4, name: 'Sports' },
-    { id: 5, name: 'Books' },
-    { id: 6, name: 'Health & Beauty' },
-    { id: 7, name: 'Toys' },
-    { id: 8, name: 'Food' }
-  ];
-
+  // URL'den kategori parametresi varsa state'e aktar
   useEffect(() => {
-    let filtered = [...products];
-
-    // Filter by category from URL
     if (categoryId) {
-      const categoryIdNum = parseInt(categoryId);
-      filtered = filtered.filter(product => product.category === categoryIdNum);
-      // Update selected categories when URL has category parameter
-      if (!selectedCategories.includes(categoryIdNum)) {
-        setSelectedCategories([categoryIdNum]);
+      const catIdNum = parseInt(categoryId);
+      if (!selectedCategories.includes(catIdNum)) {
+        setSelectedCategories([catIdNum]);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryId]);
 
-    // Filter by selected categories
+  // Filtreleme
+  useEffect(() => {
+    let filtered = Array.isArray(products) ? [...products] : [];
+
+    // Kategoriye göre filtreleme (category string, id ile eşleştir)
     if (selectedCategories.length > 0) {
-      filtered = filtered.filter(product => selectedCategories.includes(product.category));
+      const selectedNames = selectedCategories.map(id => reverseCategoryMap[id]);
+      filtered = filtered.filter(product => selectedNames.includes(product.category));
     }
 
-    // Filter by search query
+    // Arama filtresi
     if (searchQuery) {
       filtered = filtered.filter(product => 
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -185,22 +159,19 @@ function ProductsContent() {
       );
     }
 
-    // Filter by price range
+    // Fiyat aralığı filtresi
     filtered = filtered.filter(product => 
       product.price >= priceRange[0] && product.price <= priceRange[1]
     );
-
-    // Filter by stock
+    // Stok filtresi
     if (showInStockOnly) {
       filtered = filtered.filter(product => product.inStock);
     }
-
-    // Filter by ratings
+    // Puan filtresi
     if (selectedRatings.length > 0) {
       filtered = filtered.filter(product => selectedRatings.includes(Math.floor(product.rating)));
     }
-
-    // Sort products
+    // Sıralama
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
@@ -218,10 +189,17 @@ function ProductsContent() {
 
     setFilteredProducts(filtered);
     setCurrentPage(1);
-  }, [products, categoryId, sortBy, priceRange, showInStockOnly, searchQuery, selectedCategories, selectedRatings]);
+  }, [
+    products,
+    sortBy,
+    priceRange,
+    showInStockOnly,
+    searchQuery,
+    selectedRatings,
+    selectedCategories
+  ]);
 
   const addToCart = (productId: number) => {
-    console.log(`Added product ${productId} to cart`);
     alert('Ürün sepete eklendi!');
   };
 
@@ -232,9 +210,17 @@ function ProductsContent() {
         className="h-full"
         cover={
           <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <ShoppingIcon className="text-white text-xl" />
-            </div>
+            {product.image ? (
+              <img 
+                src={product.image} 
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <ShoppingIcon className="text-white text-xl" />
+              </div>
+            )}
             {product.isNew && (
               <Tag color="green" className="absolute top-2 left-2">
                 <ClockIcon /> New
@@ -263,7 +249,7 @@ function ProductsContent() {
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               e.stopPropagation();
-              addToCart(product.id);
+              addToCart(product.id as number);
             }}
           >
             <GradientButton 
@@ -295,7 +281,7 @@ function ProductsContent() {
                 )}
               </div>
               <span className="text-xs text-gray-500">
-                {categories.find(cat => cat.id === product.category)?.name}
+                {product.category}
               </span>
             </div>
           </div>
@@ -479,11 +465,9 @@ function ProductsContent() {
                   const value = parseInt(e.target.value);
                   if (value) {
                     setSelectedCategories([value]);
-                    // Update URL with category parameter
                     router.push(`/products?category=${value}`);
                   } else {
                     setSelectedCategories([]);
-                    // Remove category from URL
                     router.push('/products');
                   }
                 }}
@@ -530,8 +514,34 @@ function ProductsContent() {
           </div>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="py-12 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+            <h3 className="text-lg text-gray-600">Ürünler yükleniyor...</h3>
+            <p className="text-sm text-gray-500">Lütfen bekleyin</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="py-12 text-center">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+              <h3 className="text-lg text-red-600 mb-2">Hata Oluştu</h3>
+              <p className="text-sm text-red-500 mb-4">{error}</p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline"
+                size="sm"
+              >
+                Tekrar Dene
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Products Display */}
-        {paginatedProducts.length > 0 ? (
+        {!loading && !error && paginatedProducts.length > 0 && (
           <>
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -576,7 +586,10 @@ function ProductsContent() {
               </div>
             </div>
           </>
-        ) : (
+        )}
+
+        {/* No Products Found */}
+        {!loading && !error && paginatedProducts.length === 0 && (
           <div className="py-12 text-center">
             <h3 className="text-lg text-gray-600">Ürün bulunamadı</h3>
             <p className="text-sm text-gray-500">Lütfen farklı filtrelerle tekrar deneyin.</p>
@@ -605,6 +618,12 @@ function ProductsContent() {
                             ? [...selectedCategories, category.id]
                             : selectedCategories.filter(id => id !== category.id);
                           setSelectedCategories(newSelected);
+                          // URL'i de güncelleyin:
+                          if (newSelected.length === 1) {
+                            router.push(`/products?category=${newSelected[0]}`);
+                          } else if (newSelected.length === 0) {
+                            router.push('/products');
+                          }
                         }}
                         className="mr-2"
                       />
@@ -727,4 +746,4 @@ export default function ProductsPage() {
       <ProductsContent />
     </Suspense>
   );
-} 
+}
