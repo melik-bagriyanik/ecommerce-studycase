@@ -6,14 +6,7 @@ import { useRouter } from 'next/navigation';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
 import { TrashIcon, MinusIcon, PlusIcon } from './icons/index';
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+import { useCart } from '../context/CartContext';
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -22,30 +15,7 @@ interface CartSidebarProps {
 
 export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const router = useRouter();
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      name: 'iPhone 15 Pro Max 256GB Titanium',
-      price: 1199.99,
-      quantity: 1,
-      image: '/iphone-1.jpg'
-    },
-    {
-      id: 3,
-      name: 'Nike Air Max 270',
-      price: 129.99,
-      quantity: 2,
-      image: '/nike-1.jpg'
-    },
-    {
-      id: 5,
-      name: 'Harry Potter Complete Set',
-      price: 79.99,
-      quantity: 1,
-      image: '/harry-potter-1.jpg'
-    }
-  ]);
-
+  const { cartItems, removeFromCart, updateQuantity, totalItems, subtotal } = useCart();
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
@@ -54,24 +24,6 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     }
   }, [isOpen]);
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      setCartItems(prev => prev.filter(item => item.id !== id));
-    } else {
-      setCartItems(prev => 
-        prev.map(item => 
-          item.id === id ? { ...item, quantity: newQuantity } : item
-        )
-      );
-    }
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
-  };
-
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const tax = subtotal * 0.18; // %18 KDV
   const shipping = subtotal > 500 ? 0 : 29.99; // 500 TL üzeri ücretsiz kargo
   const total = subtotal + tax + shipping;
@@ -175,7 +127,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeFromCart(item.id)}
                       className="p-1 text-red-500 hover:text-red-700"
                     >
                       <TrashIcon size="sm" />

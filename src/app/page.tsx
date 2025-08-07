@@ -8,6 +8,7 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import axios from 'axios';
 import Button from './components/ui/Button';
 import Card from './components/ui/Card';
 import Input from './components/ui/Input';
@@ -32,8 +33,10 @@ import {
 import CartSidebar from './components/CartSidebar';
 import GradientButton from './components/GradientButton';
 import Categories from './components/cateoriesList/CategoriesList';
+import { useCart } from './context/CartContext';
+
 interface Product {
-  id: number;
+  id: number | string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -57,6 +60,60 @@ interface Category {
 export default function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [popularProducts, setPopularProducts] = useState<Product[]>([]);
+  const [newProducts, setNewProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { addToCart, totalItems } = useCart();
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        
+        const response = await axios.get("http://localhost:3000/api/products", {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        });
+
+        const apiProducts = Array.isArray(response.data.data?.products)
+          ? response.data.data.products
+          : [];
+
+        const mappedProducts = apiProducts.map((item: any) => ({
+          id: item.id || item._id,
+          name: item.name,
+          price: item.price,
+          originalPrice: item.originalPrice,
+          image: item.thumbnail || (item.images && item.images[0]) || '',
+          category: item.category,
+          rating: item.rating || 0,
+          reviewCount: item.reviewCount || 0,
+          // Backend'de bu alanlar yok, manuel olarak ekliyoruz
+          isNew: item.isNew || item.isFeatured || item.createdAt ? new Date(item.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : false, // Son 7 günde eklenenler
+          isPopular: item.isPopular || item.isFeatured || (item.rating && item.rating > 4) || (item.reviewCount && item.reviewCount > 100), // Yüksek puanlı veya çok yorumlu olanlar
+        }));
+
+        // Filter popular products (isPopular = true)
+        const popular = mappedProducts.filter((product: Product) => product.isPopular).slice(0, 4);
+        setPopularProducts(popular);
+
+        // Filter new products (isNew = true)
+        const newArrivals = mappedProducts.filter((product: Product) => product.isNew).slice(0, 4);
+        setNewProducts(newArrivals);
+
+      } catch (err: any) {
+        console.error('Error fetching products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const banners = [
     {
@@ -88,137 +145,7 @@ export default function Home() {
     }
   ];
 
-  const featuredProducts: Product[] = [
-    {
-      id: 1,
-      name: 'iPhone 15 Pro Max',
-      price: 1199.99,
-      originalPrice: 1299.99,
-      rating: 4.8,
-      reviewCount: 1247,
-      image: '/iphone.jpg',
-      category: 'Electronics',
-      isPopular: true
-    },
-    {
-      id: 2,
-      name: 'Samsung Galaxy S24 Ultra',
-      price: 1099.99,
-      rating: 4.7,
-      reviewCount: 892,
-      image: '/samsung.jpg',
-      category: 'Electronics',
-      isNew: true
-    },
-    {
-      id: 3,
-      name: 'Nike Air Max 270',
-      price: 129.99,
-      originalPrice: 159.99,
-      rating: 4.6,
-      reviewCount: 456,
-      image: '/nike.jpg',
-      category: 'Clothing',
-      isPopular: true
-    },
-    {
-      id: 4,
-      name: 'MacBook Pro M3',
-      price: 1999.99,
-      rating: 4.9,
-      reviewCount: 678,
-      image: '/macbook.jpg',
-      category: 'Electronics',
-      isNew: true
-    }
-  ];
 
-  const newArrivals: Product[] = [
-    {
-      id: 5,
-      name: 'Sony WH-1000XM5',
-      price: 349.99,
-      rating: 4.8,
-      reviewCount: 234,
-      image: '/sony.jpg',
-      category: 'Electronics',
-      isNew: true
-    },
-    {
-      id: 6,
-      name: 'Adidas Ultraboost 22',
-      price: 189.99,
-      rating: 4.7,
-      reviewCount: 123,
-      image: '/adidas.jpg',
-      category: 'Clothing',
-      isNew: true
-    },
-    {
-      id: 7,
-      name: 'Apple Watch Series 9',
-      price: 399.99,
-      rating: 4.9,
-      reviewCount: 567,
-      image: '/applewatch.jpg',
-      category: 'Electronics',
-      isNew: true
-    },
-    {
-      id: 8,
-      name: 'Dell XPS 13',
-      price: 1299.99,
-      rating: 4.6,
-      reviewCount: 89,
-      image: '/dell.jpg',
-      category: 'Electronics',
-      isNew: true
-    }
-  ];
-
-  const popularProducts: Product[] = [
-    {
-      id: 9,
-      name: 'Harry Potter Complete Set',
-      price: 79.99,
-      originalPrice: 99.99,
-      rating: 4.9,
-      reviewCount: 2156,
-      image: '/harry-potter.jpg',
-      category: 'Books',
-      isPopular: true
-    },
-    {
-      id: 10,
-      name: 'L\'Oreal Paris Skincare Set',
-      price: 49.99,
-      rating: 4.3,
-      reviewCount: 445,
-      image: '/loreal.jpg',
-      category: 'Health and Beauty',
-      isPopular: true
-    },
-    {
-      id: 11,
-      name: 'LEGO Star Wars Millennium Falcon',
-      price: 159.99,
-      rating: 4.8,
-      reviewCount: 789,
-      image: '/lego.jpg',
-      category: 'Toys',
-      isPopular: true
-    },
-    {
-      id: 12,
-      name: 'Organic Honey 500g',
-      price: 12.99,
-      rating: 4.6,
-      reviewCount: 234,
-      image: '/honey.jpg',
-      category: 'Food',
-      isPopular: true
-    }
-  ];
 
 
   const handleNewsletterSignup = () => {
@@ -259,7 +186,7 @@ export default function Home() {
           key="add-to-cart" 
           variant="blue-purple" 
           size="sm"
-          onClick={() => alert(`Added ${product.name} to cart!`)}
+          onClick={() => addToCart(product)}
         >
           Add to Cart
         </GradientButton>
@@ -330,7 +257,7 @@ export default function Home() {
             onClick={() => setIsCartOpen(true)}
             className="relative hover:text-blue-600"
           >
-            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
+            <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
           </Button>
@@ -378,7 +305,7 @@ export default function Home() {
           >
             <ShoppingCartIcon className="text-lg mb-1" />
             <span>Sepetim</span>
-            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
+            <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
           </Button>
@@ -442,6 +369,39 @@ export default function Home() {
             ))}
           </Swiper>
         </div>
+
+        {/* Features Section - Carousel Altında */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <StarIcon className="text-white text-2xl" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Hızlı Teslimat</h3>
+            <p className="text-gray-600">
+              Siparişleriniz 24 saat içinde kapınızda. Güvenli ve hızlı teslimat garantisi.
+            </p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <SafetyIcon className="text-white text-2xl" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">Güvenli Ödeme</h3>
+            <p className="text-gray-600">
+              SSL sertifikalı güvenli ödeme sistemi ile güvenle alışveriş yapın.
+            </p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <CustomerServiceIcon className="text-white text-2xl" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">7/24 Destek</h3>
+            <p className="text-gray-600">
+              Müşteri hizmetlerimiz her zaman yanınızda. Sorularınız için bize ulaşın.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Categories Grid */}
@@ -460,102 +420,85 @@ export default function Home() {
 
       {/* Featured Products */}
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Öne Çıkan Ürünler</h2>
-          <p className="text-lg text-gray-600">
-            En çok tercih edilen ürünlerimizi keşfedin
-          </p>
+        <div className="flex items-center justify-between mb-12">
+          <div className="text-center md:text-left">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Öne Çıkan Ürünler</h2>
+            <p className="text-lg text-gray-600">
+              En çok tercih edilen ürünlerimizi keşfedin
+            </p>
+          </div>
+          <Link href="/products?filter=popular">
+            <Button variant="outline" className="hidden md:block">
+              Tümünü Gör
+            </Button>
+          </Link>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, index) => (
+              <Card key={index} className="h-full">
+                <div className="w-full h-48 bg-gray-200 rounded-t-lg animate-pulse"></div>
+                <div className="p-6">
+                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {popularProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* New Arrivals */}
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Yeni Gelenler</h2>
-          <p className="text-lg text-gray-600">
-            En son eklenen ürünlerimizi keşfedin
-          </p>
+        <div className="flex items-center justify-between mb-12">
+          <div className="text-center md:text-left">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Yeni Gelenler</h2>
+            <p className="text-lg text-gray-600">
+              En son eklenen ürünlerimizi keşfedin
+            </p>
+          </div>
+          <Link href="/products?filter=new">
+            <Button variant="outline" className="hidden md:block">
+              Tümünü Gör
+            </Button>
+          </Link>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {newArrivals.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, index) => (
+              <Card key={index} className="h-full">
+                <div className="w-full h-48 bg-gray-200 rounded-t-lg animate-pulse"></div>
+                <div className="p-6">
+                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {newProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Popular Products */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Popüler Ürünler</h2>
-          <p className="text-lg text-gray-600">
-            En çok satan ürünlerimizi keşfedin
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {popularProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </div>
+
 
      
       {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-3 gap-8">
-          <Card 
-            hoverable 
-            className="shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <div className="p-6">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg mb-6 flex items-center justify-center">
-                <StarIcon className="text-white text-xl" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Hızlı Teslimat</h3>
-              <p className="text-gray-600">
-                Siparişleriniz 24 saat içinde kapınızda. Güvenli ve hızlı teslimat garantisi.
-              </p>
-            </div>
-          </Card>
-          
-          <Card 
-            hoverable 
-            className="shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <div className="p-6">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg mb-6 flex items-center justify-center">
-                <SafetyIcon className="text-white text-xl" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Güvenli Ödeme</h3>
-              <p className="text-gray-600">
-                SSL sertifikalı güvenli ödeme sistemi ile güvenle alışveriş yapın.
-              </p>
-            </div>
-          </Card>
-          
-          <Card 
-            hoverable 
-            className="shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <div className="p-6">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg mb-6 flex items-center justify-center">
-                <CustomerServiceIcon className="text-white text-xl" />
-              </div>
-              <h3 className="text-xl font-semibold mb-4">7/24 Destek</h3>
-              <p className="text-gray-600">
-                Müşteri hizmetlerimiz her zaman yanınızda. Sorularınız için bize ulaşın.
-              </p>
-            </div>
-          </Card>
-        </div>
-      </div>
+      {/* This section is now moved to appear right after the carousel */}
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">

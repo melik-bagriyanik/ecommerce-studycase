@@ -26,6 +26,7 @@ import {
 import CartSidebar from '../components/CartSidebar';
 import GradientButton from '../components/GradientButton';
 import axios from 'axios';
+import { useCart } from '../context/CartContext';
 
 interface Product {
   id: number | string;
@@ -52,15 +53,6 @@ const categoryMap: Record<string, number> = {
   'Health and Beauty': 6,
   'Toys': 7,
   'Food': 8,
-  // API'den gelen kategori isimlerini ekleyelim
-  'Electronics & Gadgets': 9,
-  'Fashion & Clothing': 10,
-  'Home & Garden': 11,
-  'Sports & Fitness': 12,
-  'Books & Literature': 13,
-  'Health & Beauty': 14,
-  'Toys & Games': 15,
-  'Food & Beverages': 16,
 };
 const reverseCategoryMap: Record<number, string> = Object.fromEntries(
   Object.entries(categoryMap).map(([k, v]) => [v, k])
@@ -70,9 +62,11 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const categoryId = searchParams.get('category');
+  const filterType = searchParams.get('filter'); // 'popular' or 'new'
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const { addToCart, totalItems } = useCart();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,6 +83,7 @@ function ProductsContent() {
         setError(null);
 
         const token = localStorage.getItem("token");
+        
         const response = await axios.get("http://localhost:3000/api/products", {
           headers: { 
             Authorization: `Bearer ${token}`,
@@ -111,8 +106,9 @@ function ProductsContent() {
           reviewCount: item.reviewCount || 0,
           description: item.description || '',
           inStock: typeof item.stock === 'number' ? item.stock > 0 : true,
-          isNew: item.isNew,
-          isPopular: item.isPopular,
+          // Backend'de bu alanlar yok, manuel olarak ekliyoruz
+          isNew: item.isNew || item.isFeatured || item.createdAt ? new Date(item.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : false, // Son 7 günde eklenenler
+          isPopular: item.isPopular || item.isFeatured || (item.rating && item.rating > 4) || (item.reviewCount && item.reviewCount > 100), // Yüksek puanlı veya çok yorumlu olanlar
         }));
 
         setProducts(mappedProducts);
@@ -144,7 +140,6 @@ function ProductsContent() {
     if (categoryId) {
       // Kategori ID'si yerine kategori ismi geliyor
       const categoryName = decodeURIComponent(categoryId);
-      console.log("Category from URL:", categoryName);
       
       // Kategori ismine göre ID bul
       const categoryIdNum = categoryMap[categoryName];
@@ -163,6 +158,13 @@ function ProductsContent() {
     if (selectedCategories.length > 0) {
       const selectedNames = selectedCategories.map(id => reverseCategoryMap[id]);
       filtered = filtered.filter(product => selectedNames.includes(product.category));
+    }
+
+    // Filter type'a göre filtreleme artık API'de yapılıyor, burada sadece ek kontrol
+    if (filterType === 'popular') {
+      filtered = filtered.filter(product => product.isPopular);
+    } else if (filterType === 'new') {
+      filtered = filtered.filter(product => product.isNew);
     }
 
     // Arama filtresi
@@ -210,12 +212,9 @@ function ProductsContent() {
     showInStockOnly,
     searchQuery,
     selectedRatings,
-    selectedCategories
+    selectedCategories,
+    filterType
   ]);
-
-  const addToCart = (productId: number) => {
-    alert('Ürün sepete eklendi!');
-  };
 
   const ProductCard = ({ product }: { product: Product }) => (
     <Link href={`/products/${product.id}`}>
@@ -263,7 +262,13 @@ function ProductsContent() {
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
               e.stopPropagation();
-              addToCart(product.id as number);
+              addToCart({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                originalPrice: product.originalPrice,
+                image: product.image
+              });
             }}
           >
             <GradientButton 
@@ -382,7 +387,7 @@ function ProductsContent() {
             onClick={() => setIsCartOpen(true)}
             className="relative hover:text-blue-600"
           >
-            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
+            <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
           </Button>
@@ -419,7 +424,7 @@ function ProductsContent() {
           >
             <ShoppingCartIcon className="text-lg mb-1" />
             <span>Sepetim</span>
-            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
+            <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
           </Button>
@@ -434,14 +439,22 @@ function ProductsContent() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {categoryId 
-              ? `${decodeURIComponent(categoryId)} Ürünleri`
+            {filterType === 'popular' 
+              ? 'Öne Çıkan Ürünler'
+              : filterType === 'new'
+              ? 'Yeni Gelen Ürünler'
+              : categoryId && categories.find(cat => cat.id === parseInt(categoryId)) 
+              ? `${categories.find(cat => cat.id === parseInt(categoryId))?.name} Ürünleri`
               : 'Ürünler'
             }
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            {categoryId
-              ? `${decodeURIComponent(categoryId)} kategorisindeki ürünleri keşfedin.`
+            {filterType === 'popular'
+              ? 'En çok tercih edilen ürünlerimizi keşfedin.'
+              : filterType === 'new'
+              ? 'En son eklenen ürünlerimizi keşfedin.'
+              : categoryId && categories.find(cat => cat.id === parseInt(categoryId))
+              ? `${categories.find(cat => cat.id === parseInt(categoryId))?.name} kategorisindeki ürünleri keşfedin.`
               : 'Binlerce kaliteli ürün arasından seçiminizi yapın. Filtreleme ve sıralama seçenekleri ile istediğiniz ürünü kolayca bulun.'
             }
           </p>

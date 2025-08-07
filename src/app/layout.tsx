@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "./context/CartContext";
+import ToastWrapper from "./components/ToastWrapper";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MelikShop - Next Generation Digital Platform",
-  description: "Experience the future of digital innovation with our modern, secure, and lightning-fast platform.",
+  title: "MelikShop - Online Alışveriş",
+  description: "En kaliteli ürünleri en uygun fiyatlarla bulabileceğiniz online alışveriş platformu",
 };
 
 export default function RootLayout({
@@ -23,11 +17,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="tr">
+      <body className={inter.className}>
+        <CartProvider>
+          {children}
+          <ToastWrapper />
+        </CartProvider>
       </body>
     </html>
   );
