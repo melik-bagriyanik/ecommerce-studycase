@@ -506,42 +506,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Newsletter Signup */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <Card 
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center border-0"
-        >
-          <div className="p-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Bültenimize Katılın</h2>
-            <p className="text-xl mb-8 opacity-90 text-white">
-              En son ürünler ve özel fırsatlar hakkında bilgi alın
-            </p>
-            
-            <div className="max-w-md mx-auto">
-              <div className="flex w-full">
-                <Input
-                  size="lg"
-                  placeholder="E-posta adresiniz"
-                  prefix={<MailIcon />}
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  onPressEnter={handleNewsletterSignup}
-                  className="flex-1"
-                />
-                <GradientButton 
-                  variant="purple-pink"
-                  size="lg"
-                  onClick={handleNewsletterSignup}
-                  className="ml-2"
-                >
-                  Abone Ol
-                </GradientButton>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
+     
       {/* Features Section */}
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="grid md:grid-cols-3 gap-8">

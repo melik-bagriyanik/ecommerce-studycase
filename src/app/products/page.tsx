@@ -52,6 +52,15 @@ const categoryMap: Record<string, number> = {
   'Health and Beauty': 6,
   'Toys': 7,
   'Food': 8,
+  // API'den gelen kategori isimlerini ekleyelim
+  'Electronics & Gadgets': 9,
+  'Fashion & Clothing': 10,
+  'Home & Garden': 11,
+  'Sports & Fitness': 12,
+  'Books & Literature': 13,
+  'Health & Beauty': 14,
+  'Toys & Games': 15,
+  'Food & Beverages': 16,
 };
 const reverseCategoryMap: Record<number, string> = Object.fromEntries(
   Object.entries(categoryMap).map(([k, v]) => [v, k])
@@ -133,9 +142,14 @@ function ProductsContent() {
   // URL'den kategori parametresi varsa state'e aktar
   useEffect(() => {
     if (categoryId) {
-      const catIdNum = parseInt(categoryId);
-      if (!selectedCategories.includes(catIdNum)) {
-        setSelectedCategories([catIdNum]);
+      // Kategori ID'si yerine kategori ismi geliyor
+      const categoryName = decodeURIComponent(categoryId);
+      console.log("Category from URL:", categoryName);
+      
+      // Kategori ismine göre ID bul
+      const categoryIdNum = categoryMap[categoryName];
+      if (categoryIdNum && !selectedCategories.includes(categoryIdNum)) {
+        setSelectedCategories([categoryIdNum]);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -420,14 +434,14 @@ function ProductsContent() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {categoryId && categories.find(cat => cat.id === parseInt(categoryId)) 
-              ? `${categories.find(cat => cat.id === parseInt(categoryId))?.name} Ürünleri`
+            {categoryId 
+              ? `${decodeURIComponent(categoryId)} Ürünleri`
               : 'Ürünler'
             }
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            {categoryId && categories.find(cat => cat.id === parseInt(categoryId))
-              ? `${categories.find(cat => cat.id === parseInt(categoryId))?.name} kategorisindeki ürünleri keşfedin.`
+            {categoryId
+              ? `${decodeURIComponent(categoryId)} kategorisindeki ürünleri keşfedin.`
               : 'Binlerce kaliteli ürün arasından seçiminizi yapın. Filtreleme ve sıralama seçenekleri ile istediğiniz ürünü kolayca bulun.'
             }
           </p>
@@ -465,7 +479,9 @@ function ProductsContent() {
                   const value = parseInt(e.target.value);
                   if (value) {
                     setSelectedCategories([value]);
-                    router.push(`/products?category=${value}`);
+                    // Kategori ismini URL'e ekle
+                    const categoryName = reverseCategoryMap[value];
+                    router.push(`/products?category=${encodeURIComponent(categoryName)}`);
                   } else {
                     setSelectedCategories([]);
                     router.push('/products');
@@ -474,7 +490,7 @@ function ProductsContent() {
               >
                 <option value="">Tüm Kategoriler</option>
                 {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
+                  <option key={category.name} value={category.id}>
                     {category.name}
                   </option>
                 ))}
@@ -608,7 +624,7 @@ function ProductsContent() {
                 <h3 className="text-lg font-semibold mb-2">Kategoriler</h3>
                 <div className="flex flex-col space-y-2">
                   {categories.map((category) => (
-                    <label key={category.id} className="flex items-center">
+                    <label key={category.name} className="flex items-center">
                       <input
                         type="checkbox"
                         value={category.id}
@@ -620,7 +636,8 @@ function ProductsContent() {
                           setSelectedCategories(newSelected);
                           // URL'i de güncelleyin:
                           if (newSelected.length === 1) {
-                            router.push(`/products?category=${newSelected[0]}`);
+                            const categoryName = reverseCategoryMap[newSelected[0]];
+                            router.push(`/products?category=${encodeURIComponent(categoryName)}`);
                           } else if (newSelected.length === 0) {
                             router.push('/products');
                           }
