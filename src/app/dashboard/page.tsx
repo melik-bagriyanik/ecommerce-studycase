@@ -7,17 +7,32 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { 
-  UserIcon, 
-
-  HeartIcon, 
-  MapPinIcon,
-  SettingsIcon,
-  LogoutIcon,
-  StarIcon,
-  ClockIcon,
-  CheckIcon,
-  TruckIcon
-} from '../components/icons/index';
+  ShoppingCart, 
+  User, 
+  Home as HomeIcon,
+  Package,
+  ShoppingBag,
+  Star,
+  Flame,
+  Clock,
+  ArrowLeft,
+  Minus,
+  Plus,
+  Heart,
+  Share2,
+  BarChart3,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Eye,
+  Pencil,
+  Settings,
+  LogOut,
+  MapPin,
+  CreditCard,
+  Truck,
+  Check
+} from 'lucide-react';
 
 interface User {
   firstName: string;
@@ -213,7 +228,7 @@ export default function DashboardPage() {
                 Hoş geldin, {user.firstName}!
               </span>
               <Button variant="ghost" onClick={handleLogout} className="flex items-center space-x-2">
-                <LogoutIcon size="sm" />
+                <LogOut size="sm" />
                 <span>Çıkış</span>
               </Button>
             </div>
@@ -243,11 +258,11 @@ export default function DashboardPage() {
 
                 <nav className="space-y-2">
                   {[
-                    { id: 'overview', label: 'Genel Bakış', icon: UserIcon },
+                    { id: 'overview', label: 'Genel Bakış', icon: User },
                     // { id: 'orders', label: 'Siparişlerim', icon: ShoppingBagIcon },
-                    { id: 'wishlist', label: 'Favorilerim', icon: HeartIcon },
-                    { id: 'addresses', label: 'Adreslerim', icon: MapPinIcon },
-                    { id: 'profile', label: 'Profil', icon: SettingsIcon }
+                    { id: 'wishlist', label: 'Favorilerim', icon: Heart },
+                    { id: 'addresses', label: 'Adreslerim', icon: MapPin },
+                    { id: 'profile', label: 'Profil', icon: Settings }
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -295,7 +310,7 @@ export default function DashboardPage() {
                           <p className="text-sm font-medium text-gray-600">Favori Ürün</p>
                           <p className="text-2xl font-bold text-gray-900">{wishlist.length}</p>
                         </div>
-                        <HeartIcon className="w-8 h-8 text-red-600" />
+                        <Heart className="w-8 h-8 text-red-600" />
                       </div>
                     </div>
                   </Card>
@@ -307,7 +322,7 @@ export default function DashboardPage() {
                           <p className="text-sm font-medium text-gray-600">Kayıtlı Adres</p>
                           <p className="text-2xl font-bold text-gray-900">{addresses.length}</p>
                         </div>
-                        <MapPinIcon className="w-8 h-8 text-green-600" />
+                        <MapPin className="w-8 h-8 text-green-600" />
                       </div>
                     </div>
                   </Card>
@@ -467,7 +482,7 @@ export default function DashboardPage() {
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center space-x-2">
-                            <MapPinIcon className="w-5 h-5 text-gray-600" />
+                            <MapPin className="w-5 h-5 text-gray-600" />
                             <h3 className="font-semibold text-gray-900">{address.name}</h3>
                           </div>
                           {address.isDefault && (

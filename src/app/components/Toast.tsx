@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckCircle, X } from 'lucide-react';
 
 interface ToastProps {
   message: string;
@@ -29,13 +29,13 @@ export default function Toast({ message, isVisible, onClose, type = 'success' }:
   return (
     <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right-2">
       <div className={`${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 min-w-80`}>
-        <CheckCircleIcon className="w-6 h-6 flex-shrink-0" />
+        <CheckCircle className="w-6 h-6 flex-shrink-0" />
         <span className="flex-1">{message}</span>
         <button
           onClick={onClose}
           className="text-white hover:text-gray-200 transition-colors"
         >
-          <XMarkIcon className="w-5 h-5" />
+          <X className="w-5 h-5" />
         </button>
       </div>
     </div>

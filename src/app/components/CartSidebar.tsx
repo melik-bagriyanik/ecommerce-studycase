@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Button from './ui/Button';
 import Badge from './ui/Badge';
-import { TrashIcon, MinusIcon, PlusIcon } from './icons/index';
+import { Trash2, Minus, Plus, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 interface CartSidebarProps {
@@ -36,6 +36,15 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   };
 
   const handleCheckout = () => {
+    // Kullanıcının giriş yapıp yapmadığını kontrol et
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      // Giriş yapmamışsa login sayfasına yönlendir
+      router.push('/login');
+      return;
+    }
+    
     // Cart items'ı localStorage'a kaydet
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
     localStorage.setItem('cartTotal', JSON.stringify({
@@ -107,7 +116,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         className="p-1"
                       >
-                        <MinusIcon size="sm" />
+                        <Minus className="w-3 h-3" />
                       </Button>
                       <span className="text-sm font-medium min-w-[2rem] text-center">{item.quantity}</span>
                       <Button
@@ -116,7 +125,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         className="p-1"
                       >
-                        <PlusIcon size="sm" />
+                        <Plus className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>
@@ -130,7 +139,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       onClick={() => removeFromCart(item.id)}
                       className="p-1 text-red-500 hover:text-red-700"
                     >
-                      <TrashIcon size="sm" />
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
                 </div>

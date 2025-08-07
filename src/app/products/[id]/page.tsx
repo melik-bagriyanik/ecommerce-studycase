@@ -15,20 +15,21 @@ import Badge from '../../components/ui/Badge';
 import Tag from '../../components/ui/Tag';
 import Rate from '../../components/ui/Rate';
 import { 
-  ShoppingCartIcon, 
-  UserIcon, 
-  HomeIcon,
-  ShoppingIcon,
-  StarIcon,
-  FireIcon,
-  ClockIcon,
-  ArrowLeftIcon,
-  HeartIcon,
-  ShareIcon,
-  MinusIcon,
-  PlusIcon,
-  TrashIcon
-} from '../../components/icons/index';
+  ShoppingCart, 
+  User, 
+  Home as HomeIcon,
+  Package,
+  ShoppingBag,
+  Star,
+  Flame,
+  Clock,
+  ArrowLeft,
+  Minus,
+  Plus,
+  Heart,
+  Share2,
+  BarChart3
+} from 'lucide-react';
 import CartSidebar from '../../components/CartSidebar';
 import GradientButton from '../../components/GradientButton';
 import axios from 'axios';
@@ -99,7 +100,8 @@ function ProductDetailContent() {
         const token = localStorage.getItem("token");
         console.log("Fetching product with ID:", productId);
         
-        const response = await axios.get(`http://localhost:3000/api/products/${productId}`, {
+        // API'den tüm ürünleri çek ve ID'ye göre filtrele
+        const response = await axios.get(`http://localhost:3000/api/products`, {
           headers: { 
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -107,9 +109,42 @@ function ProductDetailContent() {
         });
 
         console.log("API Response:", response.data);
-        const productData = response.data.data || response.data;
-        console.log("Product data:", productData);
-        setProduct(productData);
+        const allProducts = response.data.data?.products || response.data.products || [];
+        console.log("All products:", allProducts);
+        
+        // ID'ye göre ürünü bul
+        const productData = allProducts.find((p: any) => p._id === productId || p.id === productId);
+        console.log("Found product:", productData);
+        
+        if (!productData) {
+          setError('Ürün bulunamadı');
+          return;
+        }
+
+        // API'den gelen veriyi interface'e uygun hale getir
+        const mappedProduct = {
+          id: productData._id || productData.id,
+          name: productData.name,
+          price: productData.price,
+          originalPrice: productData.originalPrice,
+          description: productData.description,
+          longDescription: productData.description, // API'de longDescription yok
+          images: productData.images || [],
+          category: productData.category,
+          rating: productData.rating || 0,
+          reviewCount: productData.reviewCount || 0,
+          inStock: productData.stock > 0,
+          stockQuantity: productData.stock || 0,
+          isNew: productData.isNew || productData.isFeatured || (productData.createdAt ? new Date(productData.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : false),
+          isPopular: productData.isPopular || productData.isFeatured || (productData.rating && productData.rating > 4) || (productData.reviewCount && productData.reviewCount > 100),
+          specifications: productData.specifications || {},
+          reviews: productData.reviews || []
+        };
+
+        console.log("Mapped product:", mappedProduct);
+        console.log("Product images:", mappedProduct.images);
+        console.log("Product thumbnail:", productData.thumbnail);
+        setProduct(mappedProduct);
       } catch (err: any) {
         console.error('Error fetching product:', err);
         setError(err.response?.data?.message || 'Ürün yüklenirken bir hata oluştu');
@@ -297,25 +332,25 @@ function ProductDetailContent() {
 
         {/* Right Side Icons */}
         <div className="flex items-center space-x-4">
-          <Link href="/login" className="text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/register" className="text-gray-600 hover:text-gray-900 transition-colors">
             Sign In
           </Link>
-          <Link href="/login">
+          <Link href="/register">
             <GradientButton 
               variant="blue-purple"
               size="lg"
             >
-              Get Started
+              Hesabınız yok mu? Kaydol
             </GradientButton>
           </Link>
           
           {/* Shopping Cart Icon */}
           <Button 
             variant="ghost"
-            icon={<ShoppingCartIcon />}
             onClick={() => setIsCartOpen(true)}
             className="relative hover:text-blue-600"
           >
+            <ShoppingBag className="w-5 h-5" />
             <Badge count={3} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
@@ -325,9 +360,9 @@ function ProductDetailContent() {
           <Link href="/profile">
             <Button 
               variant="ghost"
-              icon={<UserIcon />}
               className="hover:text-blue-600"
             >
+              <User className="w-5 h-5" />
               Profil
             </Button>
           </Link>
@@ -342,7 +377,7 @@ function ProductDetailContent() {
             <span>Ana Sayfa</span>
           </Link>
           <Link href="/products" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <ShoppingIcon className="text-lg mb-1" />
+            <Package className="text-lg mb-1" />
             <span>Ürünler</span>
           </Link>
           <Button 
@@ -350,14 +385,14 @@ function ProductDetailContent() {
             className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600 relative"
             onClick={() => setIsCartOpen(true)}
           >
-            <ShoppingCartIcon className="text-lg mb-1" />
+            <ShoppingBag className="text-lg mb-1" />
             <span>Sepetim</span>
             <Badge count={3} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
           </Button>
           <Link href="/profile" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <UserIcon className="text-lg mb-1" />
+            <User className="text-lg mb-1" />
             <span>Profilim</span>
           </Link>
         </div>
@@ -369,10 +404,10 @@ function ProductDetailContent() {
         <div className="flex items-center space-x-2 mb-8">
           <Button 
             variant="ghost"
-            icon={<ArrowLeftIcon />}
             onClick={() => router.back()}
             className="text-gray-600 hover:text-blue-600"
           >
+            <ArrowLeft className="w-5 h-5" />
             Geri
           </Button>
           <span className="text-gray-400">/</span>
@@ -387,18 +422,26 @@ function ProductDetailContent() {
           {/* Product Images */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative h-96 lg:h-[500px] bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center">
-              <div className="w-32 h-32 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <ShoppingIcon className="text-white text-4xl" />
-              </div>
+            <div className="relative h-96 lg:h-[500px] bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center overflow-hidden">
+              {product.images && product.images.length > 0 && product.images[selectedImage] ? (
+                <img
+                  src={product.images[selectedImage]}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-32 h-32 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Package className="text-white text-4xl" />
+                </div>
+              )}
               {product.isNew && (
                 <Tag color="green" className="absolute top-4 left-4">
-                  <ClockIcon /> New
+                  <Clock /> New
                 </Tag>
               )}
               {product.isPopular && (
                 <Tag color="red" className="absolute top-4 left-4">
-                  <FireIcon /> Popular
+                  <Flame /> Popular
                 </Tag>
               )}
               {product.originalPrice && (
@@ -418,14 +461,24 @@ function ProductDetailContent() {
               {(product.images || []).map((image: string, index: number) => (
                 <div
                   key={index}
-                  className={`h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg cursor-pointer transition-all ${
+                  className={`h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg cursor-pointer transition-all overflow-hidden ${
                     selectedImage === index ? 'ring-2 ring-blue-500' : 'hover:ring-1 hover:ring-gray-300'
                   }`}
                   onClick={() => setSelectedImage(index)}
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center mx-auto mt-2">
-                    <ShoppingIcon className="text-white text-sm" />
-                  </div>
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center">
+                        <Package className="text-white text-sm" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -438,8 +491,10 @@ function ProductDetailContent() {
               <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
               <div className="flex items-center space-x-4 mb-4">
                 <div className="flex items-center space-x-2">
-                  <Rate disabled value={product.rating} />
-                  <span className="text-sm text-gray-600">({product.reviewCount} değerlendirme)</span>
+                  {product.rating > 0 && <Rate disabled value={product.rating} />}
+                  {product.reviewCount > 0 && (
+                    <span className="text-sm text-gray-600">({product.reviewCount} değerlendirme)</span>
+                  )}
                 </div>
                 <span className="text-sm text-gray-500">•</span>
                 <span className="text-sm text-gray-500">Stok: {product.stockQuantity} adet</span>
@@ -474,22 +529,20 @@ function ProductDetailContent() {
                 <div className="flex items-center border border-gray-300 rounded-lg">
                   <Button
                     variant="ghost"
-                    icon={<MinusIcon />}
                     onClick={() => handleQuantityChange(false)}
                     disabled={quantity <= 1}
                     className="p-2"
                   >
-                    <span></span>
+                    <Minus className="w-4 h-4" />
                   </Button>
                   <span className="text-lg font-semibold min-w-[3rem] text-center">{quantity}</span>
                   <Button
                     variant="ghost"
-                    icon={<PlusIcon />}
                     onClick={() => handleQuantityChange(true)}
                     disabled={quantity >= product.stockQuantity}
                     className="p-2"
                   >
-                    <span></span>
+                    <Plus className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
@@ -498,25 +551,25 @@ function ProductDetailContent() {
                 <GradientButton
                   variant="blue-purple"
                   size="lg"
-                  icon={<ShoppingCartIcon />}
                   onClick={addToCart}
                   disabled={!product.inStock}
                   className="flex-1"
                 >
+                  <ShoppingBag className="w-5 h-5 mr-2" />
                   {product.inStock ? 'Sepete Ekle' : 'Stokta Yok'}
                 </GradientButton>
                 <Button
                   variant="outline"
-                  icon={<HeartIcon />}
                   className="px-6"
                 >
+                  <Heart className="w-5 h-5 mr-2" />
                   Favori
                 </Button>
                 <Button
                   variant="outline"
-                  icon={<ShareIcon />}
                   className="px-6"
                 >
+                  <Share2 className="w-5 h-5 mr-2" />
                   Paylaş
                 </Button>
               </div>
@@ -529,7 +582,7 @@ function ProductDetailContent() {
                 {Object.entries(product.specifications || {}).map(([key, value]) => (
                   <div key={key} className="flex justify-between py-2 border-b border-gray-100">
                     <span className="text-gray-600">{key}</span>
-                    <span className="text-gray-900 font-medium">{value}</span>
+                    <span className="text-gray-900 font-medium">{String(value)}</span>
                   </div>
                 ))}
                 {(!product.specifications || Object.keys(product.specifications || {}).length === 0) && (
@@ -583,7 +636,7 @@ function ProductDetailContent() {
                 <Card hoverable className="h-full">
                   <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center">
                     <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                      <ShoppingIcon className="text-white text-xl" />
+                      <Package className="text-white text-xl" />
                     </div>
                     {relatedProduct.isNew && (
                       <Tag color="green" className="absolute top-2 left-2">
@@ -634,7 +687,7 @@ function ProductDetailContent() {
                   <Card hoverable className="h-full">
                     <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center">
                       <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                        <ShoppingIcon className="text-white text-xl" />
+                        <Package className="text-white text-xl" />
                       </div>
                     </div>
                     <div className="p-4">

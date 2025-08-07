@@ -16,20 +16,37 @@ import Badge from './components/ui/Badge';
 import Tag from './components/ui/Tag';
 import Rate from './components/ui/Rate';
 import { 
-  ShoppingCartIcon, 
-  UserIcon, 
-  HomeIcon,
-  CategoryIcon,
-  ShoppingIcon,
-  StarIcon,
-  SafetyIcon,
-  CustomerServiceIcon,
-  MailIcon,
-  FireIcon,
-  ClockIcon,
-  SearchIcon,
-  ChartBarIcon
-} from './components/icons/index';
+  ShoppingCart, 
+  User, 
+  Home as HomeIcon,
+  Package,
+  ShoppingBag,
+  Star,
+  Shield,
+  Headphones,
+  Mail,
+  Flame,
+  Clock,
+  Search,
+  BarChart3,
+  Heart,
+  Share2,
+  Minus,
+  Plus,
+  Trash2,
+  ArrowLeft,
+  Check,
+  CreditCard,
+  Truck,
+  Settings,
+  LogOut,
+  MapPin,
+  Eye,
+  Pencil,
+  Users,
+  DollarSign,
+  TrendingUp
+} from 'lucide-react';
 import CartSidebar from './components/CartSidebar';
 import GradientButton from './components/GradientButton';
 import Categories from './components/cateoriesList/CategoriesList';
@@ -166,17 +183,17 @@ export default function Home() {
           />
         ) : (
           <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <ShoppingIcon className="text-white text-lg" />
+            <ShoppingBag className="text-white text-lg" />
           </div>
         )}
         {product.isNew && (
           <Tag color="green" className="absolute top-2 left-2">
-            <ClockIcon /> New
+            <Clock /> New
           </Tag>
         )}
         {product.isPopular && (
           <Tag color="red" className="absolute top-2 left-2">
-            <FireIcon /> Popular
+            <Flame /> Popular
           </Tag>
         )}
         {product.originalPrice && (
@@ -239,25 +256,25 @@ export default function Home() {
 
         {/* Right Side Icons */}
         <div className="flex items-center space-x-4">
-          <Link href="/login" className="text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/register" className="text-gray-600 hover:text-gray-900 transition-colors">
             Sign In
           </Link>
-          <Link href="/login">
+          <Link href="/register">
             <GradientButton 
               variant="blue-purple"
               size="lg"
             >
-              Get Started
+              Hesabınız yok mu? Kaydol
             </GradientButton>
           </Link>
           
           {/* Shopping Cart Icon */}
           <Button 
             variant="ghost"
-            icon={<ShoppingCartIcon />}
             onClick={() => setIsCartOpen(true)}
             className="relative hover:text-blue-600"
           >
+            <ShoppingBag className="w-5 h-5" />
             <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
@@ -267,9 +284,9 @@ export default function Home() {
           <Link href="/dashboard">
             <Button 
               variant="ghost"
-              icon={<UserIcon />}
               className="hover:text-blue-600"
             >
+              <User className="w-5 h-5" />
               Profil
             </Button>
           </Link>
@@ -278,9 +295,9 @@ export default function Home() {
           <Link href="/admin">
             <Button 
               variant="ghost"
-              icon={<ChartBarIcon />}
               className="hover:text-blue-600"
             >
+              <BarChart3 className="w-5 h-5" />
               Admin
             </Button>
           </Link>
@@ -296,7 +313,7 @@ export default function Home() {
           </Link>
 
           <Link href="/products" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <ShoppingIcon className="text-lg mb-1" />
+            <ShoppingBag className="text-lg mb-1" />
             <span>Ürünler</span>
           </Link>
           <Button 
@@ -304,18 +321,18 @@ export default function Home() {
             className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600 relative"
             onClick={() => setIsCartOpen(true)}
           >
-            <ShoppingCartIcon className="text-lg mb-1" />
+            <ShoppingBag className="text-lg mb-1" />
             <span>Sepetim</span>
             <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
           </Button>
           <Link href="/dashboard" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <UserIcon className="text-lg mb-1" />
+            <User className="text-lg mb-1" />
             <span>Profilim</span>
           </Link>
           <Link href="/admin" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <ChartBarIcon className="text-lg mb-1" />
+            <BarChart3 className="text-lg mb-1" />
             <span>Admin</span>
           </Link>
         </div>
@@ -375,7 +392,7 @@ export default function Home() {
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <StarIcon className="text-white text-2xl" />
+              <Star className="text-white text-2xl" />
             </div>
             <h3 className="text-xl font-semibold mb-2">Hızlı Teslimat</h3>
             <p className="text-gray-600">
@@ -385,7 +402,7 @@ export default function Home() {
           
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <SafetyIcon className="text-white text-2xl" />
+              <Shield className="text-white text-2xl" />
             </div>
             <h3 className="text-xl font-semibold mb-2">Güvenli Ödeme</h3>
             <p className="text-gray-600">
@@ -395,7 +412,7 @@ export default function Home() {
           
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <CustomerServiceIcon className="text-white text-2xl" />
+              <Headphones className="text-white text-2xl" />
             </div>
             <h3 className="text-xl font-semibold mb-2">7/24 Destek</h3>
             <p className="text-gray-600">

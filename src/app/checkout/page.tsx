@@ -8,18 +8,33 @@ import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import { 
-  ShoppingCartIcon, 
-  UserIcon, 
-  HomeIcon,
-  ShoppingIcon,
-  StarIcon,
-  FireIcon,
-  ClockIcon,
-  ArrowLeftIcon,
-  CreditCardIcon,
-  TruckIcon,
-  CheckIcon
-} from '../components/icons/index';
+  ShoppingCart, 
+  User, 
+  Home as HomeIcon,
+  Package,
+  ShoppingBag,
+  Star,
+  Flame,
+  Clock,
+  ArrowLeft,
+  Minus,
+  Plus,
+  Heart,
+  Share2,
+  BarChart3,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Eye,
+  Pencil,
+  Settings,
+  LogOut,
+  MapPin,
+  CreditCard,
+  Truck,
+  Check,
+  Trash2
+} from 'lucide-react';
 
 interface CartItem {
   id: number;
@@ -154,7 +169,7 @@ export default function CheckoutPage() {
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckIcon className="w-8 h-8 text-green-600" />
+              <Check className="w-8 h-8 text-green-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Siparişiniz Tamamlandı!</h1>
             <p className="text-gray-600 mb-8">Siparişiniz başarıyla alındı. Sipariş numaranız: #ORD-{Date.now().toString().slice(-6)}</p>
@@ -179,7 +194,7 @@ export default function CheckoutPage() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
-              <ArrowLeftIcon />
+              <ArrowLeft />
               <span>Alışverişe Dön</span>
             </Link>
             <h1 className="text-xl font-semibold text-gray-900">Ödeme</h1>

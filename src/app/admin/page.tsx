@@ -6,19 +6,32 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { 
-  ChartBarIcon,
-  UsersIcon,
-  CurrencyDollarIcon,
-  ShoppingBagIcon,
-  TrendingUpIcon,
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
-  StarIcon,
-  ClockIcon,
-  CheckIcon,
-  TruckIcon
-} from '../components/icons/index';
+  ShoppingCart, 
+  User, 
+  Home as HomeIcon,
+  Package,
+  ShoppingBag,
+  Star,
+  Flame,
+  Clock,
+  ArrowLeft,
+  Minus,
+  Plus,
+  Heart,
+  Share2,
+  BarChart3,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Eye,
+  Pencil,
+  Settings,
+  LogOut,
+  MapPin,
+  CreditCard,
+  Truck,
+  Check
+} from 'lucide-react';
 
 interface AdminStats {
   totalSales: number;
@@ -217,11 +230,11 @@ const AdminDashboard = () => {
             </div>
             <div className="flex space-x-3">
               <Button variant="outline" size="sm">
-                <EyeIcon className="w-4 h-4 mr-2" />
+                <Eye className="w-4 h-4 mr-2" />
                 Önizleme
               </Button>
               <Button variant="primary" size="sm">
-                <PencilIcon className="w-4 h-4 mr-2" />
+                <Pencil className="w-4 h-4 mr-2" />
                 Ayarlar
               </Button>
             </div>
@@ -235,13 +248,13 @@ const AdminDashboard = () => {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <CurrencyDollarIcon className="w-6 h-6 text-blue-600" />
+                <DollarSign className="w-6 h-6 text-blue-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Toplam Satış</p>
                 <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalSales)}</p>
                 <div className="flex items-center mt-1">
-                  <TrendingUpIcon className="w-4 h-4 text-green-500" />
+                  <TrendingUp className="w-4 h-4 text-green-500" />
                   <span className="text-sm text-green-600 ml-1">+{stats.monthlyGrowth}%</span>
                 </div>
               </div>
@@ -251,13 +264,13 @@ const AdminDashboard = () => {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="p-3 bg-green-100 rounded-lg">
-                <ShoppingBagIcon className="w-6 h-6 text-green-600" />
+                <ShoppingBag className="w-6 h-6 text-green-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Toplam Sipariş</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalOrders.toLocaleString()}</p>
                 <div className="flex items-center mt-1">
-                  <TrendingUpIcon className="w-4 h-4 text-green-500" />
+                  <TrendingUp className="w-4 h-4 text-green-500" />
                   <span className="text-sm text-green-600 ml-1">+8.2%</span>
                 </div>
               </div>
@@ -267,13 +280,13 @@ const AdminDashboard = () => {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="p-3 bg-purple-100 rounded-lg">
-                <UsersIcon className="w-6 h-6 text-purple-600" />
+                <Users className="w-6 h-6 text-purple-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Toplam Müşteri</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalCustomers.toLocaleString()}</p>
                 <div className="flex items-center mt-1">
-                  <TrendingUpIcon className="w-4 h-4 text-green-500" />
+                  <TrendingUp className="w-4 h-4 text-green-500" />
                   <span className="text-sm text-green-600 ml-1">+5.1%</span>
                 </div>
               </div>
@@ -283,13 +296,13 @@ const AdminDashboard = () => {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="p-3 bg-orange-100 rounded-lg">
-                <ChartBarIcon className="w-6 h-6 text-orange-600" />
+                <BarChart3 className="w-6 h-6 text-orange-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Ortalama Sipariş</p>
                 <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.averageOrderValue)}</p>
                 <div className="flex items-center mt-1">
-                  <TrendingUpIcon className="w-4 h-4 text-green-500" />
+                  <TrendingUp className="w-4 h-4 text-green-500" />
                   <span className="text-sm text-green-600 ml-1">+2.3%</span>
                 </div>
               </div>
@@ -421,7 +434,7 @@ const AdminDashboard = () => {
                     <p className="font-medium text-gray-900">{product.name}</p>
                     <div className="flex items-center space-x-2 mt-1">
                       <div className="flex items-center">
-                        <StarIcon className="w-4 h-4 text-yellow-400" />
+                        <Star className="w-4 h-4 text-yellow-400" />
                         <span className="text-sm text-gray-600 ml-1">{product.rating}</span>
                       </div>
                       <span className="text-sm text-gray-500">•</span>

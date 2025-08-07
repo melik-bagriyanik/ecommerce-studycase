@@ -10,19 +10,20 @@ import Badge from '../components/ui/Badge';
 import Tag from '../components/ui/Tag';
 import Rate from '../components/ui/Rate';
 import { 
-  ShoppingCartIcon, 
-  UserIcon, 
-  HomeIcon,
-  CategoryIcon,
-  ShoppingIcon,
-  SearchIcon,
-  FilterIcon,
-  GridIcon,
-  ListIcon,
-  StarIcon,
-  FireIcon,
-  ClockIcon
-} from '../components/icons/index';
+  ShoppingCart, 
+  User, 
+  Home as HomeIcon,
+  Package,
+  ShoppingBag,
+  Search,
+  Filter,
+  Grid3X3,
+  List,
+  Star,
+  Flame,
+  Clock,
+  BarChart3
+} from 'lucide-react';
 import CartSidebar from '../components/CartSidebar';
 import GradientButton from '../components/GradientButton';
 import axios from 'axios';
@@ -111,6 +112,14 @@ function ProductsContent() {
           isPopular: item.isPopular || item.isFeatured || (item.rating && item.rating > 4) || (item.reviewCount && item.reviewCount > 100), // Yüksek puanlı veya çok yorumlu olanlar
         }));
 
+        console.log('API Products:', apiProducts);
+        console.log('Mapped Products:', mappedProducts);
+        console.log('Category Map:', categoryMap);
+        console.log('Selected Categories:', selectedCategories);
+        console.log('Filter Type:', filterType);
+        console.log('API Products Count:', apiProducts.length);
+        console.log('Mapped Products Count:', mappedProducts.length);
+
         setProducts(mappedProducts);
       } catch (err: any) {
         console.error('Error fetching products:', err);
@@ -133,7 +142,7 @@ function ProductsContent() {
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(8);
+  const [pageSize] = useState(50); // 8'den 50'ye çıkarıldı
 
   // URL'den kategori parametresi varsa state'e aktar
   useEffect(() => {
@@ -154,155 +163,135 @@ function ProductsContent() {
   useEffect(() => {
     let filtered = Array.isArray(products) ? [...products] : [];
 
-    // Kategoriye göre filtreleme (category string, id ile eşleştir)
-    if (selectedCategories.length > 0) {
-      const selectedNames = selectedCategories.map(id => reverseCategoryMap[id]);
-      filtered = filtered.filter(product => selectedNames.includes(product.category));
-    }
+    console.log('Initial products:', products);
+    console.log('Selected categories:', selectedCategories);
+    console.log('Filter type:', filterType);
 
-    // Filter type'a göre filtreleme artık API'de yapılıyor, burada sadece ek kontrol
-    if (filterType === 'popular') {
-      filtered = filtered.filter(product => product.isPopular);
-    } else if (filterType === 'new') {
-      filtered = filtered.filter(product => product.isNew);
-    }
+    // Geçici olarak tüm filtreleme kaldırıldı - sadece tüm ürünleri göster
+    // let filtered = Array.isArray(products) ? [...products] : [];
+
+    // Kategoriye göre filtreleme (category string, id ile eşleştir)
+    // if (selectedCategories.length > 0) {
+    //   const selectedNames = selectedCategories.map(id => reverseCategoryMap[id]);
+    //   console.log('Selected category names:', selectedNames);
+    //   filtered = filtered.filter(product => selectedNames.includes(product.category));
+    //   console.log('After category filter:', filtered);
+    // }
+
+    // Filter type'a göre filtreleme
+    // if (filterType === 'popular') {
+    //   filtered = filtered.filter(product => product.isPopular);
+    //   console.log('After popular filter:', filtered);
+    // } else if (filterType === 'new') {
+    //   filtered = filtered.filter(product => product.isNew);
+    //   console.log('After new filter:', filtered);
+    // }
 
     // Arama filtresi
-    if (searchQuery) {
-      filtered = filtered.filter(product => 
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+    // if (searchQuery) {
+    //   filtered = filtered.filter(product => 
+    //     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    //     product.description.toLowerCase().includes(searchQuery.toLowerCase())
+    //   );
+    // }
 
     // Fiyat aralığı filtresi
-    filtered = filtered.filter(product => 
-      product.price >= priceRange[0] && product.price <= priceRange[1]
-    );
+    // filtered = filtered.filter(product => 
+    //   product.price >= priceRange[0] && product.price <= priceRange[1]
+    // );
+    
     // Stok filtresi
-    if (showInStockOnly) {
-      filtered = filtered.filter(product => product.inStock);
-    }
+    // if (showInStockOnly) {
+    //   filtered = filtered.filter(product => product.inStock);
+    // }
+    
     // Puan filtresi
-    if (selectedRatings.length > 0) {
-      filtered = filtered.filter(product => selectedRatings.includes(Math.floor(product.rating)));
-    }
+    // if (selectedRatings.length > 0) {
+    //   filtered = filtered.filter(product => selectedRatings.includes(Math.floor(product.rating)));
+    // }
+    
     // Sıralama
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'price':
-          return a.price - b.price;
-        case 'rating':
-          return b.rating - a.rating;
-        case 'newest':
-          return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
-        default:
-          return 0;
-      }
-    });
+    // filtered.sort((a, b) => {
+    //   switch (sortBy) {
+    //     case 'name':
+    //       return a.name.localeCompare(b.name);
+    //     case 'price':
+    //       return a.price - b.price;
+    //     case 'rating':
+    //       return b.rating - a.rating;
+    //     case 'newest':
+    //       return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
+    //     default:
+    //       return 0;
+    //   }
+    // });
 
+    console.log('Final filtered products:', filtered);
     setFilteredProducts(filtered);
     setCurrentPage(1);
-  }, [
-    products,
-    sortBy,
-    priceRange,
-    showInStockOnly,
-    searchQuery,
-    selectedRatings,
-    selectedCategories,
-    filterType
-  ]);
+  }, [products, selectedCategories, filterType, searchQuery, priceRange, showInStockOnly, selectedRatings, sortBy]);
 
   const ProductCard = ({ product }: { product: Product }) => (
     <Link href={`/products/${product.id}`}>
-      <Card 
-        hoverable 
-        className="h-full"
-        cover={
-          <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-            {product.image ? (
-              <img 
-                src={product.image} 
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <ShoppingIcon className="text-white text-xl" />
-              </div>
-            )}
-            {product.isNew && (
-              <Tag color="green" className="absolute top-2 left-2">
-                <ClockIcon /> New
-              </Tag>
-            )}
-            {product.isPopular && (
-              <Tag color="red" className="absolute top-2 left-2">
-                <FireIcon /> Popular
-              </Tag>
-            )}
-            {product.originalPrice && (
-              <Tag color="blue" className="absolute top-2 right-2">
-                Sale
-              </Tag>
-            )}
-            {!product.inStock && (
-              <Tag color="gray" className="absolute top-2 right-2">
-                Out of Stock
-              </Tag>
-            )}
+      <Card hoverable className="h-full">
+        <div className="relative h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center">
+          {product.image ? (
+            <img 
+              src={product.image} 
+              alt={product.name}
+              className="w-full h-full object-cover rounded-t-lg"
+            />
+          ) : (
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <ShoppingBag className="text-white text-lg" />
+            </div>
+          )}
+          {product.isNew && (
+            <Tag color="green" className="absolute top-2 left-2">
+              <Clock /> New
+            </Tag>
+          )}
+          {product.isPopular && (
+            <Tag color="red" className="absolute top-2 left-2">
+              <Flame /> Popular
+            </Tag>
+          )}
+          {product.originalPrice && (
+            <Tag color="blue" className="absolute top-2 right-2">
+              Sale
+            </Tag>
+          )}
+        </div>
+        <div className="p-3">
+          <h3 className="font-semibold text-gray-900 mb-2 text-sm line-clamp-2">
+            {product.name}
+          </h3>
+          <div className="flex items-center space-x-2 mb-2">
+            <Rate disabled value={product.rating} />
+            <span className="text-xs text-gray-500">({product.reviewCount})</span>
           </div>
-        }
-        actions={[
-          <div 
-            key="add-to-cart"
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault();
-              e.stopPropagation();
-              addToCart({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                originalPrice: product.originalPrice,
-                image: product.image
-              });
-            }}
-          >
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="font-semibold text-base">${product.price}</span>
+              {product.originalPrice && (
+                <span className="line-through text-gray-500 ml-2 text-sm">
+                  ${product.originalPrice}
+                </span>
+              )}
+            </div>
+            <span className="text-xs text-gray-500">{product.category}</span>
+          </div>
+          <div className="mt-3">
             <GradientButton 
               variant="blue-purple" 
               size="sm"
-              disabled={!product.inStock}
+              onClick={() => {
+                addToCart(product);
+              }}
+              className="w-full"
             >
-              {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+              Add to Cart
             </GradientButton>
-          </div>
-        ]}
-      >
-        <div className="p-6">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-sm line-clamp-2">{product.name}</h3>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Rate disabled value={product.rating} />
-              <span className="text-xs text-gray-500">({product.reviewCount})</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-lg">${product.price}</h4>
-                {product.originalPrice && (
-                  <span className="ml-2 text-sm text-gray-500 line-through">
-                    ${product.originalPrice}
-                  </span>
-                )}
-              </div>
-              <span className="text-xs text-gray-500">
-                {product.category}
-              </span>
-            </div>
           </div>
         </div>
       </Card>
@@ -310,42 +299,51 @@ function ProductsContent() {
   );
 
   const ProductListItem = ({ product }: { product: Product }) => (
-    <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center space-x-4">
-        <div className="relative w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center">
-            <ShoppingIcon className="text-white text-sm" />
+    <Link href={`/products/${product.id}`}>
+      <div className="flex items-center space-x-4 p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer">
+        <div className="flex-shrink-0">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
+            {product.image ? (
+              <img 
+                src={product.image} 
+                alt={product.name}
+                className="w-full h-full object-cover rounded-lg"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center">
+                <ShoppingBag className="text-white text-sm" />
+              </div>
+            )}
           </div>
-          {product.isNew && (
-            <Tag color="green" className="absolute -top-1 -left-1">
-              New
-            </Tag>
-          )}
         </div>
-        <div className="flex flex-col">
-          <h3 className="text-lg">{product.name}</h3>
-          {product.isPopular && <Tag color="red">Popular</Tag>}
-          {product.originalPrice && <Tag color="blue">Sale</Tag>}
-          {!product.inStock && <Tag color="gray">Out of Stock</Tag>}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-900 truncate">{product.name}</h3>
+          <p className="text-sm text-gray-500 truncate">{product.description}</p>
+          <div className="flex items-center space-x-4 mt-2">
+            <Rate disabled value={product.rating} />
+            <span className="text-xs text-gray-500">({product.reviewCount})</span>
+            <span className="text-lg">${product.price}</span>
+            {product.originalPrice && (
+              <span className="ml-2 text-sm text-gray-500 line-through">
+                ${product.originalPrice}
+              </span>
+            )}
+          </div>
         </div>
       </div>
-      <div className="flex items-center space-x-4">
-        <Rate disabled value={product.rating} />
-        <span className="text-xs text-gray-500">({product.reviewCount})</span>
-        <span className="text-lg">${product.price}</span>
-        {product.originalPrice && (
-          <span className="ml-2 text-sm text-gray-500 line-through">
-            ${product.originalPrice}
-          </span>
-        )}
-      </div>
-    </div>
+    </Link>
   );
 
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const paginatedProducts = filteredProducts; // Pagination'ı geçici olarak kaldır
+  // const paginatedProducts = filteredProducts.slice(
+  //   (currentPage - 1) * pageSize,
+  //   currentPage * pageSize
+  // );
+
+  console.log('Filtered Products Length:', filteredProducts.length);
+  console.log('Paginated Products Length:', paginatedProducts.length);
+  console.log('Current Page:', currentPage);
+  console.log('Page Size:', pageSize);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -368,25 +366,25 @@ function ProductsContent() {
 
         {/* Right Side Icons */}
         <div className="flex items-center space-x-4">
-          <Link href="/login" className="text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/register" className="text-gray-600 hover:text-gray-900 transition-colors">
             Sign In
           </Link>
-          <Link href="/login">
+          <Link href="/register">
             <GradientButton 
               variant="blue-purple"
               size="lg"
             >
-              Get Started
+              Hesabınız yok mu? Kaydol
             </GradientButton>
           </Link>
           
           {/* Shopping Cart Icon */}
           <Button 
             variant="ghost"
-            icon={<ShoppingCartIcon />}
             onClick={() => setIsCartOpen(true)}
             className="relative hover:text-blue-600"
           >
+            <ShoppingBag className="w-5 h-5" />
             <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
@@ -396,9 +394,9 @@ function ProductsContent() {
           <Link href="/profile">
             <Button 
               variant="ghost"
-              icon={<UserIcon />}
               className="hover:text-blue-600"
             >
+              <User className="w-5 h-5" />
               Profil
             </Button>
           </Link>
@@ -414,7 +412,7 @@ function ProductsContent() {
           </Link>
 
           <Link href="/products" className="flex flex-col items-center text-xs text-blue-600">
-            <ShoppingIcon className="text-lg mb-1" />
+            <ShoppingBag className="text-lg mb-1" />
             <span>Ürünler</span>
           </Link>
           <Button 
@@ -422,14 +420,14 @@ function ProductsContent() {
             className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600 relative"
             onClick={() => setIsCartOpen(true)}
           >
-            <ShoppingCartIcon className="text-lg mb-1" />
+            <ShoppingBag className="text-lg mb-1" />
             <span>Sepetim</span>
             <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
               <span></span>
             </Badge>
           </Button>
           <Link href="/profile" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <UserIcon className="text-lg mb-1" />
+            <User className="text-lg mb-1" />
             <span>Profilim</span>
           </Link>
         </div>
@@ -469,7 +467,7 @@ function ProductsContent() {
                 size="lg"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                prefix={<SearchIcon />}
+                prefix={<Search className="text-gray-500" />}
               />
             </div>
             <div className="col-span-1 md:col-span-1">
@@ -512,7 +510,7 @@ function ProductsContent() {
             <div className="col-span-1 md:col-span-1">
               <Button
                 size="lg"
-                icon={<FilterIcon />}
+                icon={<Filter className="text-gray-500" />}
                 onClick={() => setShowFilters(true)}
                 className="w-full"
               >
@@ -525,13 +523,13 @@ function ProductsContent() {
                   className={`flex-1 p-3 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'} hover:bg-blue-50 transition-colors`}
                   onClick={() => setViewMode('grid')}
                 >
-                  <GridIcon />
+                  <Grid3X3 className="text-gray-500" />
                 </button>
                 <button
                   className={`flex-1 p-3 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'} hover:bg-blue-50 transition-colors`}
                   onClick={() => setViewMode('list')}
                 >
-                  <ListIcon />
+                  <List className="text-gray-500" />
                 </button>
               </div>
             </div>
