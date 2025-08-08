@@ -91,13 +91,13 @@ export default function ProductRecommendations({
             </span>
           )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, index) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {Array.from({ length: 5 }).map((_, index) => (
             <div key={index} className="animate-pulse">
-              <div className="bg-gray-200 rounded-lg h-32 mb-3"></div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div className="bg-gray-200 rounded-lg h-24 mb-2"></div>
+              <div className="space-y-1">
+                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-2 bg-gray-200 rounded w-1/2"></div>
               </div>
             </div>
           ))}
@@ -152,45 +152,45 @@ export default function ProductRecommendations({
         </p>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {recommendations.map((product) => (
           <Link key={product.id} href={`/products/${product.id}`}>
             <Card hoverable className="h-full transition-all duration-300 hover:shadow-lg">
-              <div className="relative h-32 bg-gradient-to-br from-purple-100 to-pink-100 rounded-t-lg overflow-hidden">
+              <div className="relative h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-t-lg overflow-hidden">
                 {product.image ? (
                   <Image 
                     src={product.image} 
                     alt={product.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                     className="object-cover transition-transform duration-300 hover:scale-105"
                     loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                      <Clock className="text-white text-xl" />
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                      <Clock className="text-white text-sm" />
                     </div>
                   </div>
                 )}
                 
                 {product.isNew && (
-                  <Tag color="green" className="absolute top-2 left-2 text-xs">
-                    <Clock className="w-3 h-3" /> New
+                  <Tag color="green" className="absolute top-1 left-1 text-xs">
+                    <Clock className="w-2 h-2" /> New
                   </Tag>
                 )}
               </div>
               
-              <div className="p-3">
-                <h4 className="font-medium text-gray-900 mb-2 text-sm line-clamp-2">
+              <div className="p-2">
+                <h4 className="font-medium text-gray-900 mb-1 text-xs line-clamp-2 min-h-[2rem]">
                   {product.name}
                 </h4>
                 
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-lg text-gray-900">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-sm text-gray-900">
                     ${product.price}
                   </span>
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded-full">
                     {product.category}
                   </span>
                 </div>
@@ -200,7 +200,7 @@ export default function ProductRecommendations({
                     e.preventDefault();
                     onAddToCart(product);
                   }}
-                  className="w-full mt-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200"
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-1 px-2 rounded text-xs font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200"
                 >
                   Sepete Ekle
                 </button>

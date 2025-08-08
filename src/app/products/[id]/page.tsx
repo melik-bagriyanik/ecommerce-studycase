@@ -661,55 +661,7 @@ function ProductDetailContent() {
           </div>
         </div>
 
-        {/* Related Products */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Benzer Ürünler</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts.map((relatedProduct) => (
-              <Link href={`/products/${relatedProduct.id}`} key={relatedProduct.id}>
-                <Card hoverable className="h-full">
-                  <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                      <Package className="text-white text-xl" />
-                    </div>
-                    {relatedProduct.isNew && (
-                      <Tag color="green" className="absolute top-2 left-2">
-                        New
-                      </Tag>
-                    )}
-                    {relatedProduct.isPopular && (
-                      <Tag color="red" className="absolute top-2 left-2">
-                        Popular
-                      </Tag>
-                    )}
-                    {relatedProduct.originalPrice && (
-                      <Tag color="blue" className="absolute top-2 right-2">
-                        Sale
-                      </Tag>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                      {relatedProduct.name}
-                    </h3>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Rate disabled value={relatedProduct.rating} />
-                      <span className="text-xs text-gray-500">({relatedProduct.reviewCount})</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-gray-900">${relatedProduct.price}</span>
-                      {relatedProduct.originalPrice && (
-                        <span className="text-sm text-gray-500 line-through">
-                          ${relatedProduct.originalPrice}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
+
 
         {/* Recently Viewed */}
         {recentlyViewed.length > 1 && (
