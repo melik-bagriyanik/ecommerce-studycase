@@ -18,6 +18,11 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { cartItems, removeFromCart, updateQuantity, totalItems, subtotal } = useCart();
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Debug: TotalItems'ı logla
+  useEffect(() => {
+    console.log('CartSidebar totalItems:', totalItems);
+  }, [totalItems]);
+
   useEffect(() => {
     if (isOpen) {
       setIsAnimating(true);

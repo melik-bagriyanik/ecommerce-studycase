@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -15,6 +15,12 @@ const Badge: React.FC<BadgeProps> = ({
   color = 'red',
   className = '',
 }) => {
+  // Debug: Count değerini logla
+  useEffect(() => {
+    if (count !== undefined) {
+      console.log('Badge count:', count);
+    }
+  }, [count]);
   const baseClasses = 'relative inline-flex';
   
   const sizeClasses = {

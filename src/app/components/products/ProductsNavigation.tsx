@@ -3,6 +3,7 @@ import { ShoppingBag, User, Home as HomeIcon } from 'lucide-react';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import GradientButton from '../GradientButton';
+import { useEffect } from 'react';
 
 interface ProductsNavigationProps {
   totalItems: number;
@@ -10,6 +11,14 @@ interface ProductsNavigationProps {
 }
 
 export default function ProductsNavigation({ totalItems, onCartOpen }: ProductsNavigationProps) {
+  // Debug: totalItems'ı logla
+  useEffect(() => {
+    console.log('=== NAVIGATION DEBUG ===');
+    console.log('ProductsNavigation totalItems:', totalItems);
+    console.log('Type of totalItems:', typeof totalItems);
+    console.log('=======================');
+  }, [totalItems]);
+
   return (
     <>
       {/* Desktop Navigation */}

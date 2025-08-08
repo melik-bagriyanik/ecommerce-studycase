@@ -153,28 +153,50 @@ export default function ProductRecommendations({
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        {recommendations.map((product) => (
-          <Link key={product.id} href={`/products/${product.id}`}>
-            <Card hoverable className="h-full transition-all duration-300 hover:shadow-lg">
-              <div className="relative h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-t-lg overflow-hidden">
-                {product.image ? (
-                  <Image 
-                    src={product.image} 
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                    className="object-cover transition-transform duration-300 hover:scale-105"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                      <Clock className="text-white text-sm" />
+        {recommendations.map((product: any) => {
+          // API'den gelen veriyi Product interface'ine uygun hale getir
+          const mappedProduct = {
+            id: product._id || product.id,
+            name: product.name,
+            price: product.price,
+            originalPrice: product.originalPrice,
+            description: product.description,
+            longDescription: product.description,
+            image: product.images && product.images.length > 0 ? product.images[0] : '',
+            images: product.images || [],
+            category: product.category,
+            rating: product.rating || 0,
+            reviewCount: product.reviewCount || 0,
+            inStock: product.stock > 0,
+            stockQuantity: product.stock || 0,
+            isNew: product.isNew || product.isFeatured || (product.createdAt ? new Date(product.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : false),
+            isPopular: product.isPopular || product.isFeatured || (product.rating && product.rating > 4) || (product.reviewCount && product.reviewCount > 100),
+            specifications: product.specifications || {},
+            reviews: product.reviews || []
+          };
+
+          return (
+            <Link key={mappedProduct.id} href={`/products/${mappedProduct.id}`}>
+              <Card hoverable className="h-full transition-all duration-300 hover:shadow-lg">
+                <div className="relative h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-t-lg overflow-hidden">
+                  {mappedProduct.images && mappedProduct.images.length > 0 ? (
+                    <Image 
+                      src={mappedProduct.images[0]} 
+                      alt={mappedProduct.name}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                      className="object-cover transition-transform duration-300 hover:scale-105"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                        <Clock className="text-white text-sm" />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 
-                {product.isNew && (
+                {mappedProduct.isNew && (
                   <Tag color="green" className="absolute top-1 left-1 text-xs">
                     <Clock className="w-2 h-2" /> New
                   </Tag>
@@ -183,22 +205,22 @@ export default function ProductRecommendations({
               
               <div className="p-2">
                 <h4 className="font-medium text-gray-900 mb-1 text-xs line-clamp-2 min-h-[2rem]">
-                  {product.name}
+                  {mappedProduct.name}
                 </h4>
                 
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-bold text-sm text-gray-900">
-                    ${product.price}
+                    ${mappedProduct.price}
                   </span>
                   <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded-full">
-                    {product.category}
+                    {mappedProduct.category}
                   </span>
                 </div>
                 
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    onAddToCart(product);
+                    onAddToCart(mappedProduct);
                   }}
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-1 px-2 rounded text-xs font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200"
                 >
@@ -207,7 +229,8 @@ export default function ProductRecommendations({
               </div>
             </Card>
           </Link>
-        ))}
+        );
+      })}
       </div>
     </div>
   );
