@@ -70,14 +70,21 @@ export default function ProductsFilters({
           <select
             className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={selectedCategories.length > 0 ? selectedCategories[0] : ''}
+            key={selectedCategories.length > 0 ? selectedCategories[0] : 'empty'}
             onChange={(e) => {
               const value = parseInt(e.target.value);
               console.log('Category selection changed:', value);
+              console.log('Current selected categories:', selectedCategories);
               console.log('Available categories:', categories);
+              
               if (value) {
                 const selectedCategory = categories.find(cat => cat.id === value);
                 console.log('Selected category:', selectedCategory);
+                
+                // State'i güncelle
                 onCategoryChange([value]);
+                console.log('Updated selected categories to:', [value]);
+                
                 // Kategori ismini URL'e ekle
                 const categoryName = selectedCategory?.name;
                 if (categoryName) {

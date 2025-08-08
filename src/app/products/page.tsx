@@ -151,14 +151,28 @@ function ProductsContent() {
 
   // URL'den kategori parametresi varsa state'e aktar
   useEffect(() => {
+    console.log('URL categoryId:', categoryId);
+    console.log('Current selectedCategories:', selectedCategories);
+    
     if (categoryId) {
       const categoryName = decodeURIComponent(categoryId);
-      const categoryIdNum = categoryMap[categoryName];
+      console.log('Decoded category name:', categoryName);
+      
+      // Dinamik map'ten kategori ID'sini bul
+      const categoryIdNum = Object.entries(dynamicCategoryMap)
+        .find(([name, id]) => name === categoryName)?.[1];
+      
+      console.log('Found category ID:', categoryIdNum);
+      
       if (categoryIdNum && !selectedCategories.includes(categoryIdNum)) {
+        console.log('Setting selected categories to:', [categoryIdNum]);
         setSelectedCategories([categoryIdNum]);
       }
+    } else if (selectedCategories.length > 0) {
+      console.log('Clearing selected categories');
+      setSelectedCategories([]);
     }
-  }, [categoryId, selectedCategories]);
+  }, [categoryId, dynamicCategoryMap]);
 
   // Filtreleme
   useEffect(() => {
@@ -212,32 +226,31 @@ function ProductsContent() {
     //   console.log('No category filter applied - showing all products');
     // }
     
-    // TÜM FİLTRELEME GEÇİCİ OLARAK DEVRE DIŞI
     // Kategori filtreleme frontend'de yapılıyor
-    // if (selectedCategories.length > 0) {
-    //   console.log('=== CATEGORY FILTER ===');
-    //   console.log('Selected categories:', selectedCategories);
-    //   console.log('Dynamic category map:', dynamicCategoryMap);
-    //   
-    //   // Seçilen kategori ID'lerine karşılık gelen kategori isimlerini bul
-    //   const selectedCategoryNames = Object.entries(dynamicCategoryMap)
-    //     .filter(([name, id]) => selectedCategories.includes(id))
-    //     .map(([name, id]) => name);
-    //   
-    //   console.log('Selected category names:', selectedCategoryNames);
-    //   
-    //   // Kategori filtreleme
-    //   const beforeFilter = filtered.length;
-    //   filtered = filtered.filter(product => {
-    //     const productCategory = product.category;
-    //     const matches = selectedCategoryNames.includes(productCategory);
-    //     console.log(`Product: ${product.name}, Category: "${productCategory}", Matches: ${matches}`);
-    //     return matches;
-    //   });
-    //   console.log(`Filtered from ${beforeFilter} to ${filtered.length} products`);
-    // } else {
-    //   console.log('No category filter applied - showing all products');
-    // }
+    if (selectedCategories.length > 0) {
+      console.log('=== CATEGORY FILTER ===');
+      console.log('Selected categories:', selectedCategories);
+      console.log('Dynamic category map:', dynamicCategoryMap);
+      
+      // Seçilen kategori ID'lerine karşılık gelen kategori isimlerini bul
+      const selectedCategoryNames = Object.entries(dynamicCategoryMap)
+        .filter(([name, id]) => selectedCategories.includes(id))
+        .map(([name, id]) => name);
+      
+      console.log('Selected category names:', selectedCategoryNames);
+      
+      // Kategori filtreleme
+      const beforeFilter = filtered.length;
+      filtered = filtered.filter(product => {
+        const productCategory = product.category;
+        const matches = selectedCategoryNames.includes(productCategory);
+        console.log(`Product: ${product.name}, Category: "${productCategory}", Matches: ${matches}`);
+        return matches;
+      });
+      console.log(`Filtered from ${beforeFilter} to ${filtered.length} products`);
+    } else {
+      console.log('No category filter applied - showing all products');
+    }
 
     // Filter type'a göre filtreleme
     // if (filterType === 'popular') {

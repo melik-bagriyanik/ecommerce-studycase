@@ -67,8 +67,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             <GradientButton 
               variant="blue-purple" 
               size="sm"
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={() => {
                 onAddToCart(product);
               }}
               className="w-full"
