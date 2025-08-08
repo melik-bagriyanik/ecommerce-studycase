@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛍️ MelikShop - E-Commerce Platform
 
-## Getting Started
+Modern e-ticaret platformu. Next.js 15, TypeScript ve Tailwind CSS ile geliştirilmiştir.
 
-First, run the development server:
+## 🚀 Özellikler
+
+- **Ürün Yönetimi**: Liste, filtreleme, arama, sıralama
+- **Responsive Tasarım**: Mobil ve desktop uyumlu
+- **Sepet Sistemi**: Ürün ekleme/çıkarma, toplam hesaplama
+- **Kullanıcı Yönetimi**: Kayıt, giriş, profil
+
+## 🛠️ Teknolojiler
+
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS, Lucide React
+- **Backend**: Node.js, Express.js, MongoDB, JWT
+
+## 🚀 Kurulum
 
 ```bash
+# Projeyi klonlayın
+git clone <repository-url>
+cd ecommerce-studycase
+
+# Bağımlılıkları yükleyin
+npm install
+
+# Geliştirme sunucusunu başlatın
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tarayıcıda `http://localhost:3000` adresini açın.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📱 Kullanım
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Ana Sayfa**: Ürün listesi, filtreleme, arama
+- **Ürün Detayı**: Ürün bilgileri, sepete ekleme
+- **Sepet**: Ürün yönetimi, ödeme
+- **Kullanıcı**: Kayıt, giriş, profil
 
-## Learn More
+## 🎯 Filtreleme Özellikleri
 
-To learn more about Next.js, take a look at the following resources:
+- **Kategori**: Electronics, Clothing, Home and Garden, Sports, Books, Health and Beauty, Toys, Food
+- **Arama**: Ürün adı, açıklama ve kategori içinde arama
+- **Sıralama**: İsim, fiyat, puan, yenilik
+- **Fiyat Aralığı**: $0 - $10,000
+- **Stok**: Sadece stokta olan ürünler
+- **Puan**: 1-5 yıldız filtreleme
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🏗️ Proje Yapısı
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/app/
+├── components/
+│   ├── products/          # Ürün componentleri
+│   ├── ui/               # UI componentleri
+│   ├── CartSidebar.tsx   # Sepet yan paneli
+│   └── Toast.tsx         # Bildirimler
+├── context/
+│   └── CartContext.tsx   # Sepet context'i
+├── types/
+│   └── Product.ts        # Tip tanımları
+└── products/             # Ürün sayfaları
+```
 
-## Deploy on Vercel
+## 🔧 Geliştirme
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Test
+npm test
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Linting
+npm run lint
+
+# Build
+npm run build
+
+# Production
+npm start
+```
+
+## 👨‍💻 Geliştirici
+
+**Melik Bağrıyanık**
+- GitHub: [@melikbagriyanik](https://github.com/melikbagriyanik)
+
+## 📄 Lisans
+
+MIT License
+
+---
+
+⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!
