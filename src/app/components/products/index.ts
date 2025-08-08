@@ -11,3 +11,4 @@ export { default as ProductsFooter } from './ProductsFooter';
 export { default as ProductsFiltersDrawer } from './ProductsFiltersDrawer';
 export { default as ProductCard } from './ProductCard';
 export { default as ProductListItem } from './ProductListItem';
+export { default as ProductRecommendations } from './ProductRecommendations';

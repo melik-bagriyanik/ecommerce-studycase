@@ -32,6 +32,8 @@ import {
 } from 'lucide-react';
 import CartSidebar from '../../components/CartSidebar';
 import GradientButton from '../../components/GradientButton';
+import { ProductRecommendations } from '../../components/products';
+import { useCart } from '../../context/CartContext';
 import axios from 'axios';
 
 interface Product {
@@ -80,6 +82,7 @@ function ProductDetailContent() {
   const params = useParams();
   const router = useRouter();
   const productId = params.id as string;
+  const { addToCart } = useCart();
   
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -87,6 +90,7 @@ function ProductDetailContent() {
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
   const [product, setProduct] = useState<any>(null);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,7 +104,7 @@ function ProductDetailContent() {
         const token = localStorage.getItem("token");
         console.log("Fetching product with ID:", productId);
         
-        // API'den tüm ürünleri çek ve ID'ye göre filtrele
+        // API'den tüm ürünleri çek
         const response = await axios.get(`http://localhost:3000/api/products`, {
           headers: { 
             Authorization: `Bearer ${token}`,
@@ -109,11 +113,11 @@ function ProductDetailContent() {
         });
 
         console.log("API Response:", response.data);
-        const allProducts = response.data.data?.products || response.data.products || [];
-        console.log("All products:", allProducts);
+        const allProductsData = response.data.data?.products || response.data.products || [];
+        console.log("All products:", allProductsData);
         
         // ID'ye göre ürünü bul
-        const productData = allProducts.find((p: any) => p._id === productId || p.id === productId);
+        const productData = allProductsData.find((p: any) => p._id === productId || p.id === productId);
         console.log("Found product:", productData);
         
         if (!productData) {
@@ -145,6 +149,7 @@ function ProductDetailContent() {
         console.log("Product images:", mappedProduct.images);
         console.log("Product thumbnail:", productData.thumbnail);
         setProduct(mappedProduct);
+        setAllProducts(allProductsData);
       } catch (err: any) {
         console.error('Error fetching product:', err);
         setError(err.response?.data?.message || 'Ürün yüklenirken bir hata oluştu');
@@ -283,8 +288,15 @@ function ProductDetailContent() {
     );
   }
 
-  const addToCart = () => {
+  const handleAddToCart = () => {
     console.log(`Added ${quantity} of product ${productId} to cart`);
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images?.[0] || '',
+      originalPrice: product.originalPrice
+    });
     alert(`${quantity} adet ${product.name} sepete eklendi!`);
   };
 
@@ -551,7 +563,7 @@ function ProductDetailContent() {
                 <GradientButton
                   variant="blue-purple"
                   size="lg"
-                  onClick={addToCart}
+                  onClick={handleAddToCart}
                   disabled={!product.inStock}
                   className="flex-1"
                 >
@@ -594,6 +606,28 @@ function ProductDetailContent() {
             </div>
           </div>
         </div>
+
+        {/* AI Recommendations */}
+        {allProducts.length > 0 && (
+          <div className="mt-16">
+            <ProductRecommendations
+              currentProduct={product}
+              allProducts={allProducts}
+              onAddToCart={addToCart}
+            />
+          </div>
+        )}
+
+        {/* AI Recommendations */}
+        {allProducts.length > 0 && (
+          <div className="mt-16">
+            <ProductRecommendations
+              currentProduct={product}
+              allProducts={allProducts}
+              onAddToCart={handleAddToCart}
+            />
+          </div>
+        )}
 
         {/* Reviews Section */}
         <div className="mt-16">
