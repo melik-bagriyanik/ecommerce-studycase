@@ -20,6 +20,7 @@ interface CartContextType {
   totalItems: number;
   subtotal: number;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
+  hideToast: () => void;
   toast: {
     message: string;
     isVisible: boolean;
@@ -63,6 +64,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       message,
       isVisible: true,
       type
+    });
+  };
+
+  const hideToast = () => {
+    setToast({
+      message: '',
+      isVisible: false,
+      type: 'success'
     });
   };
 
@@ -125,6 +134,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       totalItems,
       subtotal,
       showToast,
+      hideToast,
       toast
     }}>
       {children}

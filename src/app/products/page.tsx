@@ -57,6 +57,7 @@ function ProductsContent() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [showInStockOnly, setShowInStockOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -174,6 +175,15 @@ function ProductsContent() {
     }
   }, [categoryId, dynamicCategoryMap]);
 
+  // Search debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
   // Filtreleme
   useEffect(() => {
     let filtered = Array.isArray(products) ? [...products] : [];
@@ -253,52 +263,58 @@ function ProductsContent() {
     }
 
     // Filter type'a göre filtreleme
-    // if (filterType === 'popular') {
-    //   filtered = filtered.filter(product => product.isPopular);
-    //   console.log('After popular filter:', filtered);
-    // } else if (filterType === 'new') {
-    //   filtered = filtered.filter(product => product.isNew);
-    //   console.log('After new filter:', filtered);
-    // } else {
-    //   console.log('No filter type applied - showing all products');
-    // }
+    if (filterType === 'popular') {
+      const beforeFilter = filtered.length;
+      filtered = filtered.filter(product => product.isPopular);
+      console.log(`Popular filter: ${beforeFilter} → ${filtered.length} products`);
+    } else if (filterType === 'new') {
+      const beforeFilter = filtered.length;
+      filtered = filtered.filter(product => product.isNew);
+      console.log(`New filter: ${beforeFilter} → ${filtered.length} products`);
+    } else {
+      console.log('No filter type applied - showing all products');
+    }
 
     // Arama filtresi
-    // if (searchQuery.trim()) {
-    //   const query = searchQuery.toLowerCase().trim();
-    //   filtered = filtered.filter(product => 
-    //     product.name.toLowerCase().includes(query) ||
-    //     (product.description && product.description.toLowerCase().includes(query)) ||
-    //     product.category.toLowerCase().includes(query)
-    //   );
-    //   console.log('After search filter:', filtered);
-    // } else {
-    //   console.log('No search query - showing all products');
-    // }
+    if (debouncedSearchQuery.trim()) {
+      const query = debouncedSearchQuery.toLowerCase().trim();
+      console.log('Search query:', query);
+      const beforeSearch = filtered.length;
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(query) ||
+        (product.description && product.description.toLowerCase().includes(query)) ||
+        product.category.toLowerCase().includes(query)
+      );
+      console.log(`Search filtered from ${beforeSearch} to ${filtered.length} products`);
+    } else {
+      console.log('No search query - showing all products');
+    }
 
     // Fiyat aralığı filtresi
-    // console.log('Price range filter:', priceRange);
-    // console.log('Product prices:', filtered.map(p => p.price));
-    // filtered = filtered.filter(product => 
-    //   product.price >= priceRange[0] && product.price <= priceRange[1]
-    // );
-    // console.log('After price filter:', filtered);
+    console.log('Price range filter:', priceRange);
+    const beforePrice = filtered.length;
+    filtered = filtered.filter(product => 
+      product.price >= priceRange[0] && product.price <= priceRange[1]
+    );
+    console.log(`Price filter: ${beforePrice} → ${filtered.length} products`);
     
     // Stok filtresi
-    // if (showInStockOnly) {
-    //   filtered = filtered.filter(product => product.inStock);
-    //   console.log('After stock filter:', filtered);
-    // } else {
-    //   console.log('No stock filter applied - showing all products');
-    // }
+    if (showInStockOnly) {
+      const beforeStock = filtered.length;
+      filtered = filtered.filter(product => product.inStock);
+      console.log(`Stock filter: ${beforeStock} → ${filtered.length} products`);
+    } else {
+      console.log('No stock filter applied - showing all products');
+    }
     
     // Puan filtresi
-    // if (selectedRatings.length > 0) {
-    //   filtered = filtered.filter(product => selectedRatings.includes(Math.floor(product.rating)));
-    //   console.log('After rating filter:', filtered);
-    // } else {
-    //   console.log('No rating filter applied - showing all products');
-    // }
+    if (selectedRatings.length > 0) {
+      const beforeRating = filtered.length;
+      filtered = filtered.filter(product => selectedRatings.includes(Math.floor(product.rating)));
+      console.log(`Rating filter: ${beforeRating} → ${filtered.length} products`);
+    } else {
+      console.log('No rating filter applied - showing all products');
+    }
     
     // Sıralama
     filtered.sort((a, b) => {
@@ -329,7 +345,7 @@ function ProductsContent() {
     
     setFilteredProducts(filtered);
     setCurrentPage(1);
-  }, [products, selectedCategories, filterType, searchQuery, priceRange, showInStockOnly, selectedRatings, sortBy]);
+  }, [products, selectedCategories, filterType, debouncedSearchQuery, priceRange, showInStockOnly, selectedRatings, sortBy]);
 
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * pageSize,
