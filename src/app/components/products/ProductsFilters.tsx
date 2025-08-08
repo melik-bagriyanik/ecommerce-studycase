@@ -1,4 +1,4 @@
-import { Search, Filter, Grid3X3, List } from 'lucide-react';
+import { Search, Filter, Grid3X3, List, X } from 'lucide-react';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 
@@ -31,32 +31,53 @@ export default function ProductsFilters({
   filteredProductsCount,
   router
 }: ProductsFiltersProps) {
-  const reverseCategoryMap: Record<number, string> = {
-    1: 'Electronics',
-    2: 'Clothing',
-    3: 'Home and Garden',
-    4: 'Sports',
-    5: 'Books',
-    6: 'Health and Beauty',
-    7: 'Toys',
-    8: 'Food',
-  };
-
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="col-span-1 md:col-span-2">
+    <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-6 md:mb-8">
+      {/* Mobile Layout */}
+      <div className="block md:hidden space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
           <Input
             placeholder="Ürün ara..."
             size="lg"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             prefix={<Search className="text-gray-500" />}
+            className="w-full"
           />
         </div>
-        <div className="col-span-1 md:col-span-1">
+        
+        {/* Mobile Controls Row */}
+        <div className="flex items-center space-x-2">
+          <Button
+            size="sm"
+            icon={<Filter className="text-gray-500" />}
+            onClick={onFiltersOpen}
+            className="flex-1"
+          >
+            Filtreler
+          </Button>
+          
+          <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+            <button
+              className={`p-2 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'} hover:bg-blue-50 transition-colors`}
+              onClick={() => onViewModeChange('grid')}
+            >
+              <Grid3X3 className="w-4 h-4" />
+            </button>
+            <button
+              className={`p-2 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'} hover:bg-blue-50 transition-colors`}
+              onClick={() => onViewModeChange('list')}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        
+        {/* Mobile Dropdowns */}
+        <div className="grid grid-cols-2 gap-2">
           <select
-            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value as 'name' | 'price' | 'rating' | 'newest')}
           >
@@ -65,34 +86,21 @@ export default function ProductsFilters({
             <option value="rating">Puana göre</option>
             <option value="newest">En yeni</option>
           </select>
-        </div>
-        <div className="col-span-1 md:col-span-1">
+          
           <select
-            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={selectedCategories.length > 0 ? selectedCategories[0] : ''}
             key={selectedCategories.length > 0 ? selectedCategories[0] : 'empty'}
             onChange={(e) => {
               const value = parseInt(e.target.value);
-              console.log('Category selection changed:', value);
-              console.log('Current selected categories:', selectedCategories);
-              console.log('Available categories:', categories);
-              
               if (value) {
                 const selectedCategory = categories.find(cat => cat.id === value);
-                console.log('Selected category:', selectedCategory);
-                
-                // State'i güncelle
                 onCategoryChange([value]);
-                console.log('Updated selected categories to:', [value]);
-                
-                // Kategori ismini URL'e ekle
                 const categoryName = selectedCategory?.name;
                 if (categoryName) {
-                  console.log('Updating URL with category:', categoryName);
                   router.push(`/products?category=${encodeURIComponent(categoryName)}`);
                 }
               } else {
-                console.log('Clearing category selection');
                 onCategoryChange([]);
                 router.push('/products');
               }
@@ -106,7 +114,70 @@ export default function ProductsFilters({
             ))}
           </select>
         </div>
-        <div className="col-span-1 md:col-span-1">
+        
+        {/* Mobile Results Count */}
+        <div className="text-center">
+          <p className="text-sm text-gray-500">
+            {filteredProductsCount} ürün bulundu
+          </p>
+        </div>
+      </div>
+      
+      {/* Desktop Layout */}
+      <div className="hidden md:grid md:grid-cols-6 gap-4">
+        <div className="col-span-2">
+          <Input
+            placeholder="Ürün ara..."
+            size="lg"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            prefix={<Search className="text-gray-500" />}
+          />
+        </div>
+        
+        <div>
+          <select
+            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={sortBy}
+            onChange={(e) => onSortChange(e.target.value as 'name' | 'price' | 'rating' | 'newest')}
+          >
+            <option value="name">İsme göre</option>
+            <option value="price">Fiyata göre</option>
+            <option value="rating">Puana göre</option>
+            <option value="newest">En yeni</option>
+          </select>
+        </div>
+        
+        <div>
+          <select
+            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={selectedCategories.length > 0 ? selectedCategories[0] : ''}
+            key={selectedCategories.length > 0 ? selectedCategories[0] : 'empty'}
+            onChange={(e) => {
+              const value = parseInt(e.target.value);
+              if (value) {
+                const selectedCategory = categories.find(cat => cat.id === value);
+                onCategoryChange([value]);
+                const categoryName = selectedCategory?.name;
+                if (categoryName) {
+                  router.push(`/products?category=${encodeURIComponent(categoryName)}`);
+                }
+              } else {
+                onCategoryChange([]);
+                router.push('/products');
+              }
+            }}
+          >
+            <option value="">Tüm Kategoriler</option>
+            {categories.map((category) => (
+              <option key={category.name} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div>
           <Button
             size="lg"
             icon={<Filter className="text-gray-500" />}
@@ -116,7 +187,8 @@ export default function ProductsFilters({
             Filtreler
           </Button>
         </div>
-        <div className="col-span-1 md:col-span-1">
+        
+        <div>
           <div className="flex border border-gray-300 rounded-lg overflow-hidden">
             <button
               className={`flex-1 p-3 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'} hover:bg-blue-50 transition-colors`}
@@ -132,7 +204,8 @@ export default function ProductsFilters({
             </button>
           </div>
         </div>
-        <div className="col-span-1 md:col-span-1 text-center">
+        
+        <div className="text-center">
           <p className="text-sm text-gray-500">
             {filteredProductsCount} ürün bulundu
           </p>
