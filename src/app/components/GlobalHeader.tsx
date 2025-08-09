@@ -9,7 +9,7 @@ import GradientButton from './GradientButton';
 import { useCart } from '../context/CartContext';
 
 export default function GlobalHeader() {
-  const { totalItems } = useCart();
+  const { totalItems, openCart } = useCart();
   const [role, setRole] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -91,14 +91,17 @@ export default function GlobalHeader() {
           </Button>
         )}
 
-        <Link href="/products" className="relative hover:text-blue-600">
-          <Button variant="ghost" className="relative">
-            <ShoppingBag className="w-5 h-5" />
-            <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
-              <span />
-            </Badge>
-          </Button>
-        </Link>
+        <Button
+          variant="ghost"
+          className="relative hover:text-blue-600"
+          onClick={openCart}
+          aria-label="Sepeti aç"
+        >
+          <ShoppingBag className="w-5 h-5" />
+          <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
+            <span />
+          </Badge>
+        </Button>
 
         <Link href="/profile">
           <Button variant="ghost" className="hover:text-blue-600">

@@ -1,199 +1,91 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { 
-  ShoppingCart, 
-  User, 
-  Home as HomeIcon,
-  Package,
-  ShoppingBag,
-  Star,
-  Flame,
-  Clock,
-  ArrowLeft,
-  Minus,
-  Plus,
-  Heart,
-  Share2,
-  BarChart3,
-  Users,
-  DollarSign,
-  TrendingUp,
-  Eye,
-  Pencil,
-  Settings,
-  LogOut,
-  MapPin,
-  CreditCard,
-  Truck,
-  Check
-} from 'lucide-react';
+import { useWishlist } from '../store/useWishlist';
+import { Heart, MapPin, User as UserIcon, ShoppingBag } from 'lucide-react';
 
-interface User {
+interface UserShape {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone?: string;
 }
 
-interface Order {
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+interface OrderShape {
   id: string;
   date: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: OrderStatus;
   total: number;
   items: number;
   trackingNumber?: string;
 }
 
-interface WishlistItem {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  addedDate: string;
-}
-
-interface Address {
+interface AddressShape {
   id: string;
   type: 'home' | 'work' | 'other';
   name: string;
   address: string;
   city: string;
   postalCode: string;
-  isDefault: boolean;
+  isDefault?: boolean;
 }
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [user, setUser] = useState<User | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
-  const [addresses, setAddresses] = useState<Address[]>([]);
+export default function ProfilePage() {
+  const { items: wishlistItems, hydrate, remove } = useWishlist();
+  const [activeTab, setActiveTab] = useState<'overview' | 'wishlist' | 'orders' | 'addresses' | 'profile'>('overview');
+  const [user, setUser] = useState<UserShape | null>(null);
+  const [orders, setOrders] = useState<OrderShape[]>([]);
+  const [addresses, setAddresses] = useState<AddressShape[]>([]);
 
+  useEffect(() => { hydrate(); }, [hydrate]);
+
+  // Load lightweight user + optional orders/addresses from localStorage if present
   useEffect(() => {
-    // Check if user is logged in
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    const isEmailVerified = localStorage.getItem('isEmailVerified');
-    
-    if (!isLoggedIn || !isEmailVerified) {
-      router.push('/login');
-      return;
+    try {
+      const userStr = localStorage.getItem('userData') || localStorage.getItem('user');
+      const emailOnly = localStorage.getItem('userEmail') || '';
+      if (userStr) {
+        try {
+          const raw = JSON.parse(userStr);
+          setUser({
+            firstName: raw.firstName || raw.firstname || 'Kullanıcı',
+            lastName: raw.lastName || raw.lastname || '',
+            email: raw.email || emailOnly,
+            phone: raw.phone || ''
+          });
+        } catch {
+          setUser({ firstName: 'Kullanıcı', lastName: '', email: emailOnly, phone: '' });
+        }
+      } else {
+        setUser({ firstName: 'Kullanıcı', lastName: '', email: emailOnly, phone: '' });
+      }
+    } catch {
+      setUser({ firstName: 'Kullanıcı', lastName: '', email: '', phone: '' });
     }
 
-    // Load user data
-    const userDataStr = localStorage.getItem('userData') || localStorage.getItem('user');
-    if (userDataStr) {
-      try {
-        const raw = JSON.parse(userDataStr);
-        const mapped: User = {
-          firstName: raw.firstName || raw.firstname || raw.name?.split?.(' ')?.[0] || 'Kullanıcı',
-          lastName: raw.lastName || raw.lastname || raw.name?.split?.(' ')?.slice(1).join(' ') || '',
-          email: raw.email || raw.username || '',
-          phone: raw.phone || ''
-        };
-        setUser(mapped);
-      } catch {
-        // Fallback to minimal user using stored email
-        const email = localStorage.getItem('userEmail') || '';
-        setUser({ firstName: 'Kullanıcı', lastName: '', email, phone: '' });
-      }
-    } else {
-      // No structured user, fall back to email
-      const email = localStorage.getItem('userEmail') || '';
-      setUser({ firstName: 'Kullanıcı', lastName: '', email, phone: '' });
-    }
+    // Optional persisted data
+    try {
+      const ordersStr = localStorage.getItem('orders');
+      if (ordersStr) setOrders(JSON.parse(ordersStr));
+    } catch {}
+    try {
+      const addressesStr = localStorage.getItem('addresses');
+      if (addressesStr) setAddresses(JSON.parse(addressesStr));
+    } catch {}
+  }, []);
 
-    // Mock data
-    setOrders([
-      {
-        id: 'ORD-001',
-        date: '2024-01-15',
-        status: 'delivered',
-        total: 1299.99,
-        items: 2,
-        trackingNumber: 'TRK123456789'
-      },
-      {
-        id: 'ORD-002',
-        date: '2024-01-20',
-        status: 'shipped',
-        total: 799.99,
-        items: 1,
-        trackingNumber: 'TRK987654321'
-      },
-      {
-        id: 'ORD-003',
-        date: '2024-01-25',
-        status: 'processing',
-        total: 159.99,
-        items: 1
-      }
-    ]);
+  const overviewStats = useMemo(() => ({
+    orderCount: orders.length,
+    wishlistCount: wishlistItems.length,
+    addressCount: addresses.length,
+  }), [orders.length, wishlistItems.length, addresses.length]);
 
-    setWishlist([
-      {
-        id: 1,
-        name: 'iPhone 15 Pro Max 256GB Titanium',
-        price: 1199.99,
-        originalPrice: 1299.99,
-        image: '/iphone-1.jpg',
-        addedDate: '2024-01-10'
-      },
-      {
-        id: 2,
-        name: 'Samsung Galaxy S24 Ultra 512GB',
-        price: 1099.99,
-        originalPrice: 1199.99,
-        image: '/samsung-1.jpg',
-        addedDate: '2024-01-12'
-      },
-      {
-        id: 3,
-        name: 'MacBook Pro 14" M3 Pro',
-        price: 2499.99,
-        originalPrice: 2699.99,
-        image: '/macbook-1.jpg',
-        addedDate: '2024-01-15'
-      }
-    ]);
-
-    setAddresses([
-      {
-        id: '1',
-        type: 'home',
-        name: 'Ev Adresi',
-        address: 'Atatürk Mahallesi, Cumhuriyet Caddesi No:123',
-        city: 'İstanbul',
-        postalCode: '34000',
-        isDefault: true
-      },
-      {
-        id: '2',
-        type: 'work',
-        name: 'İş Adresi',
-        address: 'Levent Mahallesi, Büyükdere Caddesi No:456',
-        city: 'İstanbul',
-        postalCode: '34330',
-        isDefault: false
-      }
-    ]);
-  }, [router]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('isEmailVerified');
-    localStorage.removeItem('userData');
-    router.push('/');
-  };
-
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: OrderStatus) => {
     switch (status) {
       case 'delivered': return 'green';
       case 'shipped': return 'blue';
@@ -204,360 +96,193 @@ export default function DashboardPage() {
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'delivered': return 'Teslim Edildi';
-      case 'shipped': return 'Kargoda';
-      case 'processing': return 'Hazırlanıyor';
-      case 'pending': return 'Beklemede';
-      case 'cancelled': return 'İptal Edildi';
-      default: return status;
-    }
-  };
-
-  const removeFromWishlist = (id: number) => {
-    setWishlist(prev => prev.filter(item => item.id !== id));
-  };
-
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Yükleniyor...</p>
-        </div>
+        <div className="text-center text-gray-600">Yükleniyor...</div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header removed; GlobalHeader is injected by layout */}
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">Profil</h1>
+          <Link href="/products"><Button variant="outline">Alışverişe Devam Et</Button></Link>
+        </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <div className="p-6">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold">
-                      {user.firstName[0]}{user.lastName[0]}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">
-                      {user.firstName} {user.lastName}
-                    </h3>
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                  </div>
+          <div className="lg:col-span-1 space-y-4">
+            <Card className="p-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                  {user.firstName?.[0] || 'K'}{user.lastName?.[0] || ''}
                 </div>
-
-                <nav className="space-y-2">
-                  {[
-                    { id: 'overview', label: 'Genel Bakış', icon: User },
-                    { id: 'wishlist', label: 'Favorilerim', icon: Heart },
-                    { id: 'addresses', label: 'Adreslerim', icon: MapPin },
-                    { id: 'profile', label: 'Profil', icon: Settings }
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                        activeTab === tab.id
-                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      <tab.icon className="w-5 h-5" />
-                      <span className="text-sm font-medium">{tab.label}</span>
-                    </button>
-                  ))}
-                </nav>
+                <div>
+                  <div className="font-semibold text-gray-900">{user.firstName} {user.lastName}</div>
+                  <div className="text-sm text-gray-500">{user.email}</div>
+                </div>
               </div>
+            </Card>
+
+            <Card className="p-2">
+              <nav className="space-y-1">
+                {[
+                  { id: 'overview', label: 'Genel Bakış', icon: UserIcon },
+                  { id: 'wishlist', label: 'Favorilerim', icon: Heart },
+                  { id: 'orders', label: 'Siparişlerim', icon: ShoppingBag },
+                  { id: 'addresses', label: 'Adreslerim', icon: MapPin },
+                  { id: 'profile', label: 'Profil', icon: UserIcon },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setActiveTab(t.id as typeof activeTab)}
+                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left ${activeTab === t.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'}`}
+                  >
+                    <t.icon className="w-4 h-4" />
+                    <span className="text-sm font-medium">{t.label}</span>
+                    {t.id === 'wishlist' && (
+                      <span className="ml-auto">
+                        <Badge size="sm" color="red">{wishlistItems.length}</Badge>
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </nav>
             </Card>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Overview Tab */}
+          {/* Main */}
+          <div className="lg:col-span-3 space-y-8">
             {activeTab === 'overview' && (
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900">Genel Bakış</h2>
-                
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card>
-                    <div className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">Toplam Sipariş</p>
-                          <p className="text-2xl font-bold text-gray-900">{orders.length}</p>
-                        </div>
-                        {/* <ShoppingBagIcon className="w-8 h-8 text-blue-600" /> */}
-                      </div>
-                    </div>
+                <h2 className="text-xl font-semibold text-gray-900">Genel Bakış</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Card className="p-5">
+                    <div className="text-sm text-gray-600">Toplam Sipariş</div>
+                    <div className="text-2xl font-bold text-gray-900">{overviewStats.orderCount}</div>
                   </Card>
-                  
-                  <Card>
-                    <div className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">Favori Ürün</p>
-                          <p className="text-2xl font-bold text-gray-900">{wishlist.length}</p>
-                        </div>
-                       <Heart className="w-6 h-6 text-red-600" />
-                      </div>
-                    </div>
+                  <Card className="p-5">
+                    <div className="text-sm text-gray-600">Favori Ürün</div>
+                    <div className="text-2xl font-bold text-gray-900">{overviewStats.wishlistCount}</div>
                   </Card>
-                  
-                  <Card>
-                    <div className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">Kayıtlı Adres</p>
-                          <p className="text-2xl font-bold text-gray-900">{addresses.length}</p>
-                        </div>
-                        <MapPin className="w-6 h-6 text-green-600" />
-                      </div>
-                    </div>
+                  <Card className="p-5">
+                    <div className="text-sm text-gray-600">Kayıtlı Adres</div>
+                    <div className="text-2xl font-bold text-gray-900">{overviewStats.addressCount}</div>
                   </Card>
-                </div>
-
-                {/* Recent Orders */}
-                <Card>
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Son Siparişler</h3>
-                    <div className="space-y-4">
-                      {orders.slice(0, 3).map((order) => (
-                        <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                              {/* <ShoppingBagIcon className="w-5 h-5 text-blue-600" /> */}
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{order.id}</p>
-                              <p className="text-sm text-gray-500">{order.date}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium text-gray-900">{order.total.toFixed(2)} TL</p>
-                            <Badge color={getStatusColor(order.status)} size="sm">
-                              {getStatusText(order.status)}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            )}
-
-            {/* Orders Tab */}
-            {activeTab === 'orders' && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900">Siparişlerim</h2>
-                
-                <div className="space-y-4">
-                  {orders.map((order) => (
-                    <Card key={order.id}>
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{order.id}</h3>
-                            <p className="text-sm text-gray-500">{order.date}</p>
-                          </div>
-                          <Badge color={getStatusColor(order.status)}>
-                            {getStatusText(order.status)}
-                          </Badge>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                          <div>
-                            <p className="text-sm text-gray-600">Toplam Tutar</p>
-                            <p className="font-semibold text-gray-900">{order.total.toFixed(2)} TL</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Ürün Sayısı</p>
-                            <p className="font-semibold text-gray-900">{order.items}</p>
-                          </div>
-                          {order.trackingNumber && (
-                            <div>
-                              <p className="text-sm text-gray-600">Takip No</p>
-                              <p className="font-semibold text-gray-900">{order.trackingNumber}</p>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="flex space-x-3">
-                          <Button variant="ghost" size="sm">
-                            Detayları Gör
-                          </Button>
-                          {order.trackingNumber && (
-                            <Button variant="ghost" size="sm">
-                              Kargo Takip
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
                 </div>
               </div>
             )}
 
-            {/* Wishlist Tab */}
             {activeTab === 'wishlist' && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900">Favorilerim</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {wishlist.map((item) => (
-                    <Card key={item.id}>
-                      <div className="p-4">
-                        <div className="relative mb-4">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-48 object-cover rounded-lg"
-                          />
-                          <button
-                            onClick={() => removeFromWishlist(item.id)}
-                            className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                        
-                        <h3 className="font-semibold text-gray-900 mb-2">{item.name}</h3>
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-2">
-                            <span className="font-bold text-gray-900">{item.price.toFixed(2)} TL</span>
-                            {item.originalPrice && (
-                              <span className="text-sm text-gray-500 line-through">
-                                {item.originalPrice.toFixed(2)} TL
-                              </span>
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900">Favorilerim</h2>
+                {wishlistItems.length === 0 ? (
+                  <Card className="p-6 text-gray-600">Favori ürününüz bulunmuyor.</Card>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {wishlistItems.map((item) => (
+                      <Card key={item.id} className="p-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                            {item.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-xs text-gray-400">IMG</span>
                             )}
                           </div>
-                          <Badge color="red" size="sm">
-                            Favori
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex space-x-2">
-                          <Button size="sm" className="flex-1">
-                            Sepete Ekle
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            Detay
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Addresses Tab */}
-            {activeTab === 'addresses' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-gray-900">Adreslerim</h2>
-                  <Button>
-                    Yeni Adres Ekle
-                  </Button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {addresses.map((address) => (
-                    <Card key={address.id}>
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="w-5 h-5 text-gray-600" />
-                            <h3 className="font-semibold text-gray-900">{address.name}</h3>
+                          <div className="flex-1">
+                            <h3 className="text-sm font-medium text-gray-900 line-clamp-2">{item.name}</h3>
+                            <div className="text-sm font-semibold text-gray-900 mt-1">${item.price}</div>
                           </div>
-                          {address.isDefault && (
-                            <Badge color="green" size="sm">
-                              Varsayılan
-                            </Badge>
-                          )}
                         </div>
-                        
-                        <div className="space-y-2 text-sm text-gray-600">
-                          <p>{address.address}</p>
-                          <p>{address.city} {address.postalCode}</p>
+                        <div className="flex items-center justify-end gap-2 mt-4">
+                          <Link href={`/products/${item.id}`}><Button size="sm" variant="outline">İncele</Button></Link>
+                          <Button size="sm" variant="ghost" onClick={() => remove(item.id)}>Kaldır</Button>
                         </div>
-                        
-                        <div className="flex space-x-2 mt-4">
-                          <Button variant="ghost" size="sm">
-                            Düzenle
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            Sil
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Profile Tab */}
+            {activeTab === 'orders' && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900">Siparişlerim</h2>
+                {orders.length === 0 ? (
+                  <Card className="p-6 text-gray-600">Henüz siparişiniz bulunmuyor.</Card>
+                ) : (
+                  <div className="space-y-3">
+                    {orders.map((o) => (
+                      <Card key={o.id} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium text-gray-900">{o.id}</div>
+                            <div className="text-sm text-gray-500">{o.date}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-semibold text-gray-900">{o.total.toFixed(2)} TL</div>
+                            <Badge size="sm" color={getStatusColor(o.status)}>{o.status}</Badge>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'addresses' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-900">Adreslerim</h2>
+                  <Button size="sm" variant="outline">Yeni Adres</Button>
+                </div>
+                {addresses.length === 0 ? (
+                  <Card className="p-6 text-gray-600">Kayıtlı adresiniz bulunmuyor.</Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {addresses.map((a) => (
+                      <Card key={a.id} className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="font-medium text-gray-900">{a.name}</div>
+                          {a.isDefault && <Badge size="sm" color="green">Varsayılan</Badge>}
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <div>{a.address}</div>
+                          <div>{a.city} {a.postalCode}</div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {activeTab === 'profile' && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900">Profil Bilgileri</h2>
-                
-                <Card>
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Ad</label>
-                        <input
-                          type="text"
-                          value={user.firstName}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Soyad</label>
-                        <input
-                          type="text"
-                          value={user.lastName}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">E-posta</label>
-                        <input
-                          type="email"
-                          value={user.email}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
-                        <input
-                          type="tel"
-                          value={user.phone}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900">Profil</h2>
+                <Card className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-600">Ad</div>
+                      <div className="font-medium text-gray-900">{user.firstName}</div>
                     </div>
-                    
-                    <div className="mt-6 flex space-x-3">
-                      <Button>
-                        Değişiklikleri Kaydet
-                      </Button>
-                      <Button variant="ghost">
-                        İptal
-                      </Button>
+                    <div>
+                      <div className="text-sm text-gray-600">Soyad</div>
+                      <div className="font-medium text-gray-900">{user.lastName}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600">E-posta</div>
+                      <div className="font-medium text-gray-900">{user.email}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600">Telefon</div>
+                      <div className="font-medium text-gray-900">{user.phone || '-'}</div>
                     </div>
                   </div>
                 </Card>
@@ -568,4 +293,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-} 
+}

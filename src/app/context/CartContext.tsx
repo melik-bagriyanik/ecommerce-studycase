@@ -21,6 +21,10 @@ interface CartContextType {
   subtotal: number;
   showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   hideToast: () => void;
+  // Global cart sidebar controls
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
   toast: {
     message: string;
     isVisible: boolean;
@@ -32,6 +36,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
     isVisible: boolean;
@@ -195,6 +200,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       subtotal,
       showToast,
       hideToast,
+      isCartOpen,
+      openCart: () => setIsCartOpen(true),
+      closeCart: () => setIsCartOpen(false),
       toast
     }}>
       {children}

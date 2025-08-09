@@ -35,6 +35,8 @@ import GradientButton from '../../components/GradientButton';
 import { ProductRecommendations } from '../../components/products';
 import { useCart } from '../../context/CartContext';
 import axios from 'axios';
+import { useWishlist } from '../../store/useWishlist';
+import { Product as ProductType } from '../../types/Product';
 
 interface RelatedProduct {
   id: number;
@@ -52,7 +54,8 @@ function ProductDetailContent() {
   const params = useParams();
   const router = useRouter();
   const productId = params.id as string;
-  const { addToCart } = useCart();
+  const { addToCart, showToast } = useCart();
+  const { hydrate, has, toggle } = useWishlist();
   
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -64,6 +67,11 @@ function ProductDetailContent() {
   const [error, setError] = useState<string | null>(null);
   const [frequentlyItems, setFrequentlyItems] = useState<any[]>([]);
   const [selectedBundleIds, setSelectedBundleIds] = useState<string[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
   // Fetch product data from API
   useEffect(() => {
@@ -163,6 +171,12 @@ function ProductDetailContent() {
       fetchProduct();
     }
   }, [productId]);
+
+  useEffect(() => {
+    if (product) {
+      setIsFavorite(has(product.id));
+    }
+  }, [product, has]);
 
   // Add to recently viewed
   useEffect(() => {
@@ -468,9 +482,31 @@ function ProductDetailContent() {
                 <Button
                   variant="outline"
                   className="px-6"
+                  onClick={() => {
+                    if (!product) return;
+                    const mapped: ProductType = {
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      originalPrice: product.originalPrice,
+                      image: product.images?.[0] || '',
+                      category: product.category,
+                      brand: undefined,
+                      rating: product.rating || 0,
+                      reviewCount: product.reviewCount || 0,
+                      description: product.description || '',
+                      inStock: product.inStock,
+                      isNew: product.isNew,
+                      isPopular: product.isPopular,
+                    };
+                    const wasFav = has(product.id);
+                    toggle(mapped);
+                    setIsFavorite((v) => !v);
+                    showToast(`${product.name} ${wasFav ? 'favorilerden çıkarıldı' : 'favorilere eklendi'}!`, 'success');
+                  }}
                 >
-                  <Heart className="w-5 h-5 mr-2" />
-                  Favori
+                  <Heart className={`w-5 h-5 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                  {isFavorite ? 'Favoride' : 'Favori'}
                 </Button>
                 <Button
                   variant="outline"

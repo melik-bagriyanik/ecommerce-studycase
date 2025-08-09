@@ -47,11 +47,11 @@ import {
   DollarSign,
   TrendingUp
 } from 'lucide-react';
-import CartSidebar from './components/CartSidebar';
+// CartSidebar shown globally via layout CartOverlay
 import GradientButton from './components/GradientButton';
 import Categories from './components/cateoriesList/CategoriesList';
 import { useCart } from './context/CartContext';
-import { Product as ProductType } from './types/Product';
+import { Product, Product as ProductType } from './types/Product';
 import { ProductCard as ProductCardComp } from './components/products';
 
 // Using shared Product type from types/Product.ts
@@ -66,7 +66,7 @@ interface Category {
 }
 
 export default function Home() {
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  // CartSidebar is global now
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [popularProducts, setPopularProducts] = useState<ProductType[]>([]);
   const [newProducts, setNewProducts] = useState<ProductType[]>([]);
@@ -170,28 +170,28 @@ export default function Home() {
       id: 1,
       title: 'Yeni Sezon Koleksiyonu',
       subtitle: 'En trend ürünler %50\'ye kadar indirimle',
-      image: '/banner1.jpg',
+      image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=1600&auto=format&fit=crop&q=60',
       buttonText: 'Alışverişe Başla',
       buttonLink: '/products',
-      gradient: 'from-blue-600 to-purple-600'
+    
     },
     {
       id: 2,
       title: 'Elektronik Fırsatları',
       subtitle: 'Teknoloji ürünlerinde büyük indirimler',
-      image: '/banner2.jpg',
-      buttonText: 'Elektronik Keşfet',
+      image:'https://images.unsplash.com/photo-1625766763788-95dcce9bf5ac?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+       buttonText: 'Elektronik Keşfet',
       buttonLink: '/products?category=1',
-      gradient: 'from-green-600 to-blue-600'
+     
     },
     {
       id: 3,
       title: 'Spor & Outdoor',
       subtitle: 'Aktif yaşam için en iyi ürünler',
-      image: '/banner3.jpg',
+      image:"https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1770&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       buttonText: 'Spor Ürünleri',
       buttonLink: '/products?category=4',
-      gradient: 'from-orange-600 to-red-600'
+
     }
   ];
 
@@ -240,8 +240,21 @@ export default function Home() {
           >
             {banners.map((banner) => (
               <SwiperSlide key={banner.id}>
-                <div className={`relative h-96 md:h-[500px] rounded-3xl overflow-hidden bg-gradient-to-r ${banner.gradient}`}>
-                  <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+                <div className={`relative h-96 md:h-[500px] rounded-3xl overflow-hidden`}>
+                  {/* Background Image */}
+                  {banner.image && (
+                    <Image
+                      src={banner.image}
+                      alt={banner.title}
+                      fill
+                      priority={banner.id === 1}
+                      sizes="100vw"
+                      className="object-cover"
+                    />
+                  )}
+                  {/* Gradient and dark overlay for readability */}
+                  <div className={`absolute`}></div>
+                  <div className="absolute "></div>
                   <div className="relative z-10 flex items-center justify-center h-full">
                     <div className="text-center text-white px-8">
                       <h2 className="text-4xl md:text-6xl font-bold mb-4">{banner.title}</h2>
@@ -413,8 +426,7 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Cart Sidebar */}
-      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      {/* Cart Sidebar is rendered globally in layout */}
     </div>
   );
 }

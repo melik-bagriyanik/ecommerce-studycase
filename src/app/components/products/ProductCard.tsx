@@ -1,12 +1,16 @@
+"use client";
+import { useEffect, useState, MouseEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Clock, Flame } from 'lucide-react';
+import { ShoppingBag, Clock, Flame, Heart } from 'lucide-react';
 import Card from '../ui/Card';
 import Tag from '../ui/Tag';
 import Rate from '../ui/Rate';
 import GradientButton from '../GradientButton';
 
 import { Product } from '../../types/Product';
+import { useWishlist } from '../../store/useWishlist';
+import { useCart } from '../../context/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -14,6 +18,27 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  const { hydrate, has, toggle } = useWishlist();
+  const { showToast } = useCart();
+  const [isFavorite, setIsFavorite] = useState(false);
+  useEffect(() => { hydrate(); }, [hydrate]);
+  useEffect(() => { setIsFavorite(has(product.id)); }, [has, product.id]);
+
+  const toggleFavorite = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const wasFavorite = has(product.id);
+    toggle({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      originalPrice: (product as any).originalPrice,
+      category: product.category,
+    });
+    setIsFavorite((v) => !v);
+    showToast(`${product.name} ${wasFavorite ? 'favorilerden çıkarıldı' : 'favorilere eklendi'}!`, 'success');
+  };
   return (
     <Link href={`/products/${product.id}`}>
       <Card hoverable className="h-full transition-all duration-300 hover:shadow-xl">
@@ -52,11 +77,14 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
           </div>
           
-          {product.originalPrice && (
-            <Tag color="blue" className="absolute top-2 right-2 text-xs">
-              Sale
-            </Tag>
-          )}
+          {/* Favorite button */}
+          <button
+            onClick={toggleFavorite}
+            className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 hover:bg-white shadow-sm"
+            aria-label="Favorilere ekle"
+          >
+            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} />
+          </button>
         </div>
         
         <div className="p-4">
@@ -87,11 +115,9 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             <GradientButton 
               variant="blue-purple" 
               size="sm"
-              onClick={() => {
-                // Prevent navigation when adding to cart
-                if (typeof window !== 'undefined') {
-                  window.event?.preventDefault();
-                }
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 onAddToCart(product);
               }}
               className="w-full"

@@ -214,7 +214,7 @@ export default function ProductsFilters({
           <div className="relative">
             <Button
               size="lg"
-              icon={<Filter className="text-gray-500" />}
+              icon={<Filter style={{ filter: 'brightness(2)' }} />}
               onClick={() => {
                 console.log('Filters button clicked');
                 onFiltersOpen();
@@ -237,13 +237,13 @@ export default function ProductsFilters({
               className={`flex-1 p-3 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'} hover:bg-blue-50 transition-colors`}
               onClick={() => onViewModeChange('grid')}
             >
-              <Grid3X3 className="text-gray-500" />
+              <Grid3X3  style={{ filter: 'brightness(2)' }} className="text-gray-500" />
             </button>
             <button
               className={`flex-1 p-3 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'} hover:bg-blue-50 transition-colors`}
               onClick={() => onViewModeChange('list')}
             >
-              <List className="text-gray-500" />
+              <List  style={{ filter: 'brightness(2)' }} className="text-gray-500" />
             </button>
           </div>
         </div>

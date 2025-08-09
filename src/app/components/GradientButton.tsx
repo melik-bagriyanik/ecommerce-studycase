@@ -6,7 +6,7 @@ interface GradientButtonProps {
   variant?: 'blue-purple' | 'green-blue' | 'orange-red' | 'purple-pink';
   size?: 'sm' | 'md' | 'lg';
   icon?: React.ReactNode;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
   disabled?: boolean;
   loading?: boolean;

@@ -91,19 +91,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <p className="text-gray-600">Sign in to your account to continue</p>
         </div>
 
-        {/* Demo User Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center">
-            <svg className="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-sm font-medium text-blue-800">Demo Kullanıcı Bilgileri:</span>
-          </div>
-          <div className="mt-2 text-sm text-blue-700">
-            <p><strong>Email:</strong> demo@example.com</p>
-            <p><strong>Şifre:</strong> demo123</p>
-          </div>
-        </div>
+        {/* Demo bilgi kutusu kaldırıldı */}
 
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">

@@ -32,6 +32,7 @@ import {
   Truck,
   Check
 } from 'lucide-react';
+import axios from 'axios';
 
 interface AdminStats {
   totalSales: number;
@@ -82,107 +83,66 @@ const AdminDashboard = () => {
   const [salesData, setSalesData] = useState<SalesData[]>([]);
 
   useEffect(() => {
-    // Mock data loading
-    setStats({
-      totalSales: 125000,
-      totalOrders: 1247,
-      totalCustomers: 892,
-      averageOrderValue: 100.24,
-      conversionRate: 3.2,
-      monthlyGrowth: 12.5
-    });
+    const fetchOverview = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get('http://localhost:3000/api/admin/dashboard/overview', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        const data = res.data?.data || {};
+        const totals = data.totals || {};
+        const totalSales = Number(totals.totalSales) || 0;
+        const totalOrders = Number(totals.totalOrders) || 0;
+        const paidOrders = Number(totals.paidOrders) || 0;
+        const customerCount = Number(totals.customerCount) || 0;
 
-    setRecentOrders([
-      {
-        id: 'ORD-001',
-        customerName: 'Ahmet Yılmaz',
-        customerEmail: 'ahmet@email.com',
-        total: 299.99,
-        status: 'delivered',
-        date: '2024-01-15',
-        items: 3
-      },
-      {
-        id: 'ORD-002',
-        customerName: 'Fatma Demir',
-        customerEmail: 'fatma@email.com',
-        total: 149.50,
-        status: 'shipped',
-        date: '2024-01-14',
-        items: 2
-      },
-      {
-        id: 'ORD-003',
-        customerName: 'Mehmet Kaya',
-        customerEmail: 'mehmet@email.com',
-        total: 599.99,
-        status: 'processing',
-        date: '2024-01-14',
-        items: 1
-      },
-      {
-        id: 'ORD-004',
-        customerName: 'Ayşe Özkan',
-        customerEmail: 'ayse@email.com',
-        total: 89.99,
-        status: 'pending',
-        date: '2024-01-13',
-        items: 4
-      },
-      {
-        id: 'ORD-005',
-        customerName: 'Ali Çelik',
-        customerEmail: 'ali@email.com',
-        total: 199.99,
-        status: 'delivered',
-        date: '2024-01-13',
-        items: 2
+        const avgOrder = (paidOrders || totalOrders) > 0 ? totalSales / (paidOrders || totalOrders) : 0;
+
+        setStats({
+          totalSales,
+          totalOrders,
+          totalCustomers: customerCount,
+          averageOrderValue: avgOrder,
+          conversionRate: 0,
+          monthlyGrowth: 0
+        });
+
+        const apiRecent = Array.isArray(data.recentOrders) ? data.recentOrders : [];
+        setRecentOrders(apiRecent.map((o: any) => ({
+          id: o.id || o._id || '',
+          customerName: o.customerName || o.customer?.name || 'Müşteri',
+          customerEmail: o.customerEmail || o.customer?.email || '',
+          total: Number(o.total) || 0,
+          status: (o.status || 'pending') as any,
+          date: o.createdAt || o.date || new Date().toISOString(),
+          items: Array.isArray(o.items) ? o.items.length : (o.items || 0)
+        })));
+
+        const apiPopular = Array.isArray(data.popularProducts) ? data.popularProducts : [];
+        setPopularProducts(apiPopular.map((p: any) => ({
+          id: p.id || p._id,
+          name: p.name,
+          sales: Number(p.sales) || 0,
+          revenue: Number(p.price) || 0,
+          rating: Number(p.rating) || 0,
+          image: p.thumbnail || (Array.isArray(p.images) && p.images[0]) || ''
+        })));
+
+        const trend = data.charts?.salesTrend || [];
+        setSalesData(trend.map((t: any) => ({
+          month: t.month || t.label || '',
+          sales: Number(t.sales) || 0,
+          orders: Number(t.orders) || 0
+        })));
+      } catch (e) {
+        console.error('Admin overview fetch error:', e);
+        // keep defaults
       }
-    ]);
-
-    setPopularProducts([
-      {
-        id: 1,
-        name: 'iPhone 15 Pro',
-        sales: 156,
-        revenue: 156000,
-        rating: 4.8,
-        image: '/iphone-1.jpg'
-      },
-      {
-        id: 2,
-        name: 'Nike Air Max',
-        sales: 89,
-        revenue: 8900,
-        rating: 4.6,
-        image: '/nike-1.jpg'
-      },
-      {
-        id: 3,
-        name: 'Harry Potter Set',
-        sales: 67,
-        revenue: 6700,
-        rating: 4.9,
-        image: '/harry-potter-1.jpg'
-      },
-      {
-        id: 4,
-        name: 'Samsung Galaxy',
-        sales: 45,
-        revenue: 45000,
-        rating: 4.7,
-        image: '/samsung-1.jpg'
-      }
-    ]);
-
-    setSalesData([
-      { month: 'Oca', sales: 45000, orders: 180 },
-      { month: 'Şub', sales: 52000, orders: 210 },
-      { month: 'Mar', sales: 48000, orders: 195 },
-      { month: 'Nis', sales: 61000, orders: 245 },
-      { month: 'May', sales: 58000, orders: 230 },
-      { month: 'Haz', sales: 72000, orders: 285 }
-    ]);
+    };
+    fetchOverview();
   }, []);
 
   const getStatusColor = (status: string) => {
@@ -303,14 +263,18 @@ const AdminDashboard = () => {
                 </div>
               </div>
               
-              <div className="h-64 flex items-end justify-between space-x-2">
-                {salesData.map((data, index) => (
-                  <div key={index} className="flex flex-col items-center">
-                    <div className="w-8 bg-blue-500 rounded-t" style={{ height: `${(data.sales / 72000) * 200}px` }}></div>
-                    <span className="text-xs text-gray-600 mt-2">{data.month}</span>
-                  </div>
-                ))}
-              </div>
+               {salesData.length === 0 ? (
+                 <div className="h-64 flex items-center justify-center text-gray-500">Satış verisi bulunmuyor</div>
+               ) : (
+                 <div className="h-64 flex items-end justify-between space-x-2">
+                   {salesData.map((data, index) => (
+                     <div key={index} className="flex flex-col items-center">
+                       <div className="w-8 bg-blue-500 rounded-t" style={{ height: `${(data.sales / Math.max(1, Math.max(...salesData.map(s=>s.sales)))) * 200}px` }}></div>
+                       <span className="text-xs text-gray-600 mt-2">{data.month}</span>
+                     </div>
+                   ))}
+                 </div>
+               )}
               
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <div className="text-center">
@@ -407,8 +371,12 @@ const AdminDashboard = () => {
             <div className="space-y-4">
               {popularProducts.map((product) => (
                 <div key={product.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <span className="text-xs text-gray-600">IMG</span>
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs text-gray-600">IMG</span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{product.name}</p>
@@ -417,13 +385,12 @@ const AdminDashboard = () => {
                         <Star className="w-4 h-4 text-yellow-400" />
                         <span className="text-sm text-gray-600 ml-1">{product.rating}</span>
                       </div>
-                      <span className="text-sm text-gray-500">•</span>
-                      <span className="text-sm text-gray-600">{product.sales} satış</span>
+                      {product.sales > 0 && (<><span className="text-sm text-gray-500">•</span><span className="text-sm text-gray-600">{product.sales} satış</span></>)}
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-gray-900">{formatCurrency(product.revenue)}</p>
-                    <p className="text-xs text-gray-500">gelir</p>
+                    <p className="text-xs text-gray-500">fiyat</p>
                   </div>
                 </div>
               ))}

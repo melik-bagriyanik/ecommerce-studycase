@@ -19,7 +19,7 @@ import {
   ProductsFiltersDrawer
 } from '../components/products';
 import ProductsFiltersDesktop from '../components/products/ProductsFiltersDesktop';
-import CartSidebar from '../components/CartSidebar';
+// CartSidebar overlay moved to root layout
 import { Product } from '../types/Product';
 
 const categoryMap: Record<string, number> = {
@@ -45,7 +45,7 @@ function ProductsContent() {
   const { addToCart, totalItems } = useCart();
 
   // State
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  // Cart open state is now managed globally in CartContext
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [products, setProducts] = useState<Product[]>([]);
@@ -495,8 +495,7 @@ function ProductsContent() {
         maxPrice={maxPrice}
       />
 
-      {/* Cart Sidebar */}
-      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      {/* Cart Sidebar shown globally in layout */}
     </div>
   );
 }
