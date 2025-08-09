@@ -18,8 +18,9 @@ const Categories: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
     axios
-      .get("http://localhost:3000/api/products", {
+      .get(`${API_BASE}/api/products`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setCategories(res.data.data))

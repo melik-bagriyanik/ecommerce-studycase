@@ -31,7 +31,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setError('');
 
   try {
-    const response = await axios.post('http://localhost:3000/api/auth/login', {
+    const response = await axios.post(`${process.env.API_BASE_URL}/api/auth/login`, {
       email: formData.email,
       password: formData.password
     });

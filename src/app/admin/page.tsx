@@ -86,7 +86,8 @@ const AdminDashboard = () => {
     const fetchOverview = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:3000/api/admin/dashboard/overview', {
+        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+        const res = await axios.get(`${API_BASE}/api/admin/dashboard/overview`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'

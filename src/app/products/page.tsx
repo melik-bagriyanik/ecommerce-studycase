@@ -84,7 +84,8 @@ function ProductsContent() {
         const token = localStorage.getItem("token");
         
         // Tüm ürünleri çek, filtreleme frontend'de yapılacak
-        const apiUrl = "http://localhost:3000/api/products?limit=100&page=1";
+        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+        const apiUrl = `${API_BASE}/api/products?limit=100&page=1`;
         console.log('API URL:', apiUrl);
         
         const response = await axios.get(apiUrl, {

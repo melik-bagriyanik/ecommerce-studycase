@@ -84,7 +84,8 @@ function ProductDetailContent() {
         console.log("Fetching product with ID:", productId);
         
         // API'den tüm ürünleri çek
-        const response = await axios.get(`http://localhost:3000/api/products`, {
+        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+        const response = await axios.get(`${API_BASE}/api/products`, {
           headers: { 
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'

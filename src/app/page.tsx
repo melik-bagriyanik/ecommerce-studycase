@@ -11,10 +11,6 @@ import 'swiper/css/pagination';
 import axios from 'axios';
 import Button from './components/ui/Button';
 import Card from './components/ui/Card';
-import Input from './components/ui/Input';
-import Badge from './components/ui/Badge';
-import Tag from './components/ui/Tag';
-import Rate from './components/ui/Rate';
 import { 
   ShoppingCart, 
   User, 
@@ -119,9 +115,10 @@ export default function Home() {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        
-        const response = await axios.get("http://localhost:3000/api/products", {
-          headers: { 
+
+        const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+        const response = await axios.get(`${API_BASE}/api/products`, {
+          headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
