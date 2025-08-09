@@ -63,7 +63,7 @@ export default function GlobalHeader() {
   };
 
   return (
-    <nav className="flex items-center justify-between p-6 max-w-7xl mx-auto">
+    <nav className="flex items-center justify-between px-4 py-3 md:p-6 max-w-7xl mx-auto">
       <div className="flex items-center space-x-2">
         <Link href="/" className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg" />
@@ -76,23 +76,35 @@ export default function GlobalHeader() {
         <Link href="/products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Ürünler</Link>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 md:space-x-4">
+        {/* Auth (mobile) */}
         {!isLoggedIn ? (
           <>
-            <Link href="/login" className="text-gray-600 hover:text-gray-900 transition-colors">Sign In</Link>
-            <Link href="/register">
-              <GradientButton variant="blue-purple" size="lg">Hesabınız yok mu? Kaydol</GradientButton>
+            <Link href="/login" className="text-gray-600 hover:text-gray-900 transition-colors md:hidden text-sm">Giriş</Link>
+            <Link href="/register" className="md:hidden">
+              <GradientButton variant="blue-purple" size="sm">Kaydol</GradientButton>
             </Link>
           </>
         ) : (
-          <Button variant="ghost" onClick={handleLogout} className="flex items-center space-x-2 text-gray-600 hover:text-red-600">
+          <Button size="sm" variant="ghost" onClick={handleLogout} className="flex items-center space-x-2 text-gray-600 hover:text-red-600">
             <LogOut className="w-5 h-5" />
-            <span>Çıkış yap</span>
+            <span className="hidden md:inline">Çıkış yap</span>
           </Button>
+        )}
+
+        {/* Auth (desktop) */}
+        {!isLoggedIn && (
+          <>
+            <Link href="/login" className="hidden md:inline text-gray-600 hover:text-gray-900 transition-colors">Sign In</Link>
+            <Link href="/register" className="hidden md:inline">
+              <GradientButton variant="blue-purple" size="lg">Hesabınız yok mu? Kaydol</GradientButton>
+            </Link>
+          </>
         )}
 
         <Button
           variant="ghost"
+          size="sm"
           className="relative hover:text-blue-600"
           onClick={openCart}
           aria-label="Sepeti aç"
@@ -103,18 +115,20 @@ export default function GlobalHeader() {
           </Badge>
         </Button>
 
-        <Link href="/profile">
-          <Button variant="ghost" className="hover:text-blue-600">
-            <User className="w-5 h-5" />
-            Profil
-          </Button>
-        </Link>
+        {isLoggedIn && (
+          <Link href="/profile">
+            <Button size="sm" variant="ghost" className="hover:text-blue-600">
+              <User className="w-5 h-5" />
+              <span className="hidden md:inline">Profil</span>
+            </Button>
+          </Link>
+        )}
 
-        {role === 'admin' && (
+        {isLoggedIn && role === 'admin' && (
           <Link href="/admin">
-            <Button variant="ghost" className="hover:text-blue-600">
+            <Button size="sm" variant="ghost" className="hover:text-blue-600">
               <BarChart3 className="w-5 h-5" />
-              Admin
+              <span className="hidden md:inline">Admin</span>
             </Button>
           </Link>
         )}
