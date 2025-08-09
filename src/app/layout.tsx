@@ -9,7 +9,7 @@ import CartOverlay from "./components/CartOverlay";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MelikShop - Online Alışveriş",
+  title: "MlkShop - Online Alışveriş",
   description: "En kaliteli ürünleri en uygun fiyatlarla bulabileceğiniz online alışveriş platformu",
 };
 

@@ -1,4 +1,4 @@
-# 🛍️ MelikShop - E-Commerce Platform
+# 🛍️ MlkShop - E-Commerce Platform
 
 Modern e-ticaret platformu. Next.js 15, TypeScript ve Tailwind CSS ile geliştirilmiştir.
 
@@ -101,8 +101,8 @@ npm start
 
 ## 👨‍💻 Geliştirici
 
-**Melik Bağrıyanık**
-- GitHub: [@melikbagriyanik](https://github.com/melikbagriyanik)
+**Mlk Bağrıyanık**
+- GitHub: [@Mlkbagriyanik](https://github.com/Mlkbagriyanik)
 
 ## 📄 Lisans
 

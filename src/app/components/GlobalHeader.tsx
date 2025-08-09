@@ -63,11 +63,11 @@ export default function GlobalHeader() {
   };
 
   return (
-    <nav style={{ padding: '20px 80px' }} className="flex bg-sky-50 items-center justify-between px-4 py-3 md:p-6  mx-auto">
+    <nav style={{ padding: '20px 80px' }} className="flex bg-violet-50 items-center justify-between px-4 py-3 md:p-6  mx-auto">
       <div className="flex items-center space-x-2">
         <Link href="/" className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg" />
-          <span className="text-xl font-bold text-gray-900">MelikShop</span>
+          <span className="text-xl font-bold text-gray-900">MlkShop</span>
         </Link>
       </div>
 
