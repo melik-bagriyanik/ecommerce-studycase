@@ -43,6 +43,20 @@ const handleSubmit = async (e: React.FormEvent) => {
 
       localStorage.setItem('token', token);
       localStorage.setItem('userEmail', user.email);
+      if (user?.role) {
+        localStorage.setItem('role', String(user.role).toLowerCase());
+      }
+      try {
+        localStorage.setItem('user', JSON.stringify(user));
+      } catch {}
+      // Mark authenticated flags for dashboard
+      localStorage.setItem('isLoggedIn', 'true');
+      // If backend provides email verified flag, reflect it; otherwise allow dashboard
+      if (typeof user?.isEmailVerified !== 'undefined') {
+        localStorage.setItem('isEmailVerified', user.isEmailVerified ? 'true' : 'false');
+      } else {
+        localStorage.setItem('isEmailVerified', 'true');
+      }
 
       router.push('/');
     } else {

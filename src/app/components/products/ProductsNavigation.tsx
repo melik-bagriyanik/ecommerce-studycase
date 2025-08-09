@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { ShoppingBag, User, Home as HomeIcon } from 'lucide-react';
+import { ShoppingBag, User, Home as HomeIcon, LogOut } from 'lucide-react';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import GradientButton from '../GradientButton';
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface ProductsNavigationProps {
   totalItems: number;
@@ -11,13 +11,17 @@ interface ProductsNavigationProps {
 }
 
 export default function ProductsNavigation({ totalItems, onCartOpen }: ProductsNavigationProps) {
-  // Debug: totalItems'ı logla
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(() => {
-    console.log('=== NAVIGATION DEBUG ===');
-    console.log('ProductsNavigation totalItems:', totalItems);
-    console.log('Type of totalItems:', typeof totalItems);
-    console.log('=======================');
-  }, [totalItems]);
+    setIsLoggedIn(Boolean(localStorage.getItem('token')));
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  };
 
   return (
     <>
@@ -40,17 +44,26 @@ export default function ProductsNavigation({ totalItems, onCartOpen }: ProductsN
 
         {/* Right Side Icons */}
         <div className="flex items-center space-x-4">
-          <Link href="/register" className="text-gray-600 hover:text-gray-900 transition-colors">
-            Sign In
-          </Link>
-          <Link href="/register">
-            <GradientButton 
-              variant="blue-purple"
-              size="lg"
-            >
-              Hesabınız yok mu? Kaydol
-            </GradientButton>
-          </Link>
+          {!isLoggedIn ? (
+            <>
+              <Link href="/login" className="text-gray-600 hover:text-gray-900 transition-colors">
+                Sign In
+              </Link>
+              <Link href="/register">
+                <GradientButton 
+                  variant="blue-purple"
+                  size="lg"
+                >
+                  Hesabınız yok mu? Kaydol
+                </GradientButton>
+              </Link>
+            </>
+          ) : (
+            <Button variant="ghost" onClick={handleLogout} className="flex items-center space-x-2 text-gray-600 hover:text-red-600">
+              <LogOut className="w-5 h-5" />
+              <span>Çıkış yap</span>
+            </Button>
+          )}
           
           {/* Shopping Cart Icon */}
           <Button 

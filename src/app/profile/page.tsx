@@ -88,9 +88,26 @@ export default function DashboardPage() {
     }
 
     // Load user data
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      setUser(JSON.parse(userData));
+    const userDataStr = localStorage.getItem('userData') || localStorage.getItem('user');
+    if (userDataStr) {
+      try {
+        const raw = JSON.parse(userDataStr);
+        const mapped: User = {
+          firstName: raw.firstName || raw.firstname || raw.name?.split?.(' ')?.[0] || 'Kullanıcı',
+          lastName: raw.lastName || raw.lastname || raw.name?.split?.(' ')?.slice(1).join(' ') || '',
+          email: raw.email || raw.username || '',
+          phone: raw.phone || ''
+        };
+        setUser(mapped);
+      } catch {
+        // Fallback to minimal user using stored email
+        const email = localStorage.getItem('userEmail') || '';
+        setUser({ firstName: 'Kullanıcı', lastName: '', email, phone: '' });
+      }
+    } else {
+      // No structured user, fall back to email
+      const email = localStorage.getItem('userEmail') || '';
+      setUser({ firstName: 'Kullanıcı', lastName: '', email, phone: '' });
     }
 
     // Mock data
@@ -215,26 +232,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg"></div>
-              <span className="text-xl font-bold text-gray-900">MelikShop</span>
-            </Link>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                Hoş geldin, {user.firstName}!
-              </span>
-              <Button variant="ghost" onClick={handleLogout} className="flex items-center space-x-2">
-                <LogOut size="sm" />
-                <span>Çıkış</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Header removed; GlobalHeader is injected by layout */}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -259,7 +257,6 @@ export default function DashboardPage() {
                 <nav className="space-y-2">
                   {[
                     { id: 'overview', label: 'Genel Bakış', icon: User },
-                    // { id: 'orders', label: 'Siparişlerim', icon: ShoppingBagIcon },
                     { id: 'wishlist', label: 'Favorilerim', icon: Heart },
                     { id: 'addresses', label: 'Adreslerim', icon: MapPin },
                     { id: 'profile', label: 'Profil', icon: Settings }
@@ -273,7 +270,7 @@ export default function DashboardPage() {
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
-                      <tab.icon size="sm" />
+                      <tab.icon className="w-5 h-5" />
                       <span className="text-sm font-medium">{tab.label}</span>
                     </button>
                   ))}
@@ -310,7 +307,7 @@ export default function DashboardPage() {
                           <p className="text-sm font-medium text-gray-600">Favori Ürün</p>
                           <p className="text-2xl font-bold text-gray-900">{wishlist.length}</p>
                         </div>
-                        <Heart className="w-8 h-8 text-red-600" />
+                       <Heart className="w-6 h-6 text-red-600" />
                       </div>
                     </div>
                   </Card>
@@ -322,7 +319,7 @@ export default function DashboardPage() {
                           <p className="text-sm font-medium text-gray-600">Kayıtlı Adres</p>
                           <p className="text-2xl font-bold text-gray-900">{addresses.length}</p>
                         </div>
-                        <MapPin className="w-8 h-8 text-green-600" />
+                        <MapPin className="w-6 h-6 text-green-600" />
                       </div>
                     </div>
                   </Card>

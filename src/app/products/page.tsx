@@ -7,7 +7,6 @@ import { useCart } from '../context/CartContext';
 
 // Components
 import {
-  ProductsNavigation,
   ProductsHeader,
   ProductsFilters,
   ProductsGrid,
@@ -23,7 +22,6 @@ import ProductsFiltersDesktop from '../components/products/ProductsFiltersDeskto
 import CartSidebar from '../components/CartSidebar';
 import { Product } from '../types/Product';
 
-// Kategori map'i ve ters map
 const categoryMap: Record<string, number> = {
   'Electronics': 1,
   'Clothing': 2,
@@ -146,7 +144,7 @@ function ProductsContent() {
         
         // Max price hesapla ve priceRange'i başlangıçta ayarla
         const computedMaxPrice = mappedProducts.length > 0
-          ? Math.max(...mappedProducts.map((p) => Number(p.price) || 0))
+          ? Math.max(...mappedProducts.map((p:any) => Number(p.price) || 0))
           : 10000;
         const normalizedMax = Math.max(0, Math.ceil(computedMaxPrice));
         setMaxPrice(normalizedMax);
@@ -224,40 +222,6 @@ function ProductsContent() {
     // GEÇİCİ OLARAK TÜM FİLTRELEME DEVRE DIŞI - SADECE TÜM ÜRÜNLERİ GÖSTER
     console.log('ALL FILTERING DISABLED - SHOWING ALL PRODUCTS');
 
-    // Kategoriye göre filtreleme - GEÇİCİ OLARAK DEVRE DIŞI
-    // if (selectedCategories.length > 0) {
-    //   console.log('=== CATEGORY FILTER DEBUG ===');
-    //   console.log('Selected categories:', selectedCategories);
-    //   console.log('Dynamic category map:', dynamicCategoryMap);
-    //   console.log('Available product categories:', [...new Set(filtered.map(p => p.category))]);
-    //   
-    //   // Seçilen kategori ID'lerine karşılık gelen kategori isimlerini bul
-    //   const selectedCategoryNames = Object.entries(dynamicCategoryMap)
-    //     .filter(([name, id]) => selectedCategories.includes(id))
-    //     .map(([name, id]) => name);
-    //   
-    //   console.log('Selected category names:', selectedCategoryNames);
-    //   
-    //   // Her ürün için detaylı kontrol
-    //   console.log('=== PRODUCT CATEGORY CHECK ===');
-    //   filtered.forEach(product => {
-    //     const productCategory = product.category;
-    //     const matches = selectedCategoryNames.includes(productCategory);
-    //     console.log(`Product: ${product.name}, Category: "${productCategory}", Selected: ${selectedCategoryNames}, Matches: ${matches}`);
-    //   });
-    //   
-    //   // Kategori ismine göre filtreleme
-    //   filtered = filtered.filter(product => {
-    //     const productCategory = product.category;
-    //     const matches = selectedCategoryNames.includes(productCategory);
-    //     return matches;
-    //   });
-    //   console.log('After category filter count:', filtered.length);
-    //   console.log('=== END CATEGORY FILTER DEBUG ===');
-    // } else {
-    //   console.log('No category filter applied - showing all products');
-    // }
-    
     // Kategori filtreleme frontend'de yapılıyor
     if (selectedCategories.length > 0) {
       console.log('=== CATEGORY FILTER ===');
@@ -404,12 +368,6 @@ function ProductsContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Navigation */}
-      <ProductsNavigation 
-        totalItems={totalItems} 
-        onCartOpen={() => setIsCartOpen(true)} 
-      />
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Header */}

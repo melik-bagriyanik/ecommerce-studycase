@@ -51,19 +51,10 @@ import CartSidebar from './components/CartSidebar';
 import GradientButton from './components/GradientButton';
 import Categories from './components/cateoriesList/CategoriesList';
 import { useCart } from './context/CartContext';
+import { Product as ProductType } from './types/Product';
+import { ProductCard as ProductCardComp } from './components/products';
 
-interface Product {
-  id: number | string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  category: string;
-  isNew?: boolean;
-  isPopular?: boolean;
-}
+// Using shared Product type from types/Product.ts
 
 interface Category {
   id: number;
@@ -77,10 +68,50 @@ interface Category {
 export default function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [popularProducts, setPopularProducts] = useState<Product[]>([]);
-  const [newProducts, setNewProducts] = useState<Product[]>([]);
+  const [popularProducts, setPopularProducts] = useState<ProductType[]>([]);
+  const [newProducts, setNewProducts] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
   const { addToCart, totalItems } = useCart();
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getUserRole = () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payloadBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const payloadJson = JSON.parse(atob(payloadBase64));
+            const candidates: any[] = [
+              payloadJson?.role,
+              Array.isArray(payloadJson?.roles) ? payloadJson.roles[0] : undefined,
+              payloadJson?.user?.role,
+              payloadJson?.role?.name,
+              payloadJson?.permissions?.includes?.('admin') ? 'admin' : undefined,
+              payloadJson?.isAdmin ? 'admin' : undefined,
+            ].filter(Boolean);
+            if (candidates.length > 0) return String(candidates[0]);
+          }
+        }
+        const storedRole = localStorage.getItem('role');
+        if (storedRole) return storedRole;
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          try {
+            const userObj = JSON.parse(userStr);
+            if (userObj?.role) return String(userObj.role);
+            if (userObj?.isAdmin) return 'admin';
+          } catch {}
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    };
+    const r = getUserRole();
+    setRole(r ? String(r).toLowerCase() : null);
+  }, []);
 
   // Fetch products from API
   useEffect(() => {
@@ -100,13 +131,15 @@ export default function Home() {
           ? response.data.data.products
           : [];
 
-        const mappedProducts = apiProducts.map((item: any) => ({
+        const mappedProducts: ProductType[] = apiProducts.map((item: any) => ({
           id: item.id || item._id,
           name: item.name,
           price: item.price,
           originalPrice: item.originalPrice,
           image: item.thumbnail || (item.images && item.images[0]) || '',
           category: item.category,
+          description: item.description || '',
+          inStock: typeof item.stock === 'number' ? item.stock > 0 : true,
           rating: item.rating || 0,
           reviewCount: item.reviewCount || 0,
           // Backend'de bu alanlar yok, manuel olarak ekliyoruz
@@ -172,171 +205,13 @@ export default function Home() {
     }
   };
 
-  const ProductCard = ({ product }: { product: Product }) => (
-    <Card hoverable className="h-full">
-      <div className="relative h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center">
-        {product.image ? (
-          <img 
-            src={product.image} 
-            alt={product.name}
-            className="w-full h-full object-cover rounded-t-lg"
-          />
-        ) : (
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <ShoppingBag className="text-white text-lg" />
-          </div>
-        )}
-        {product.isNew && (
-          <Tag color="green" className="absolute top-2 left-2">
-            <Clock /> New
-          </Tag>
-        )}
-        {product.isPopular && (
-          <Tag color="red" className="absolute top-2 left-2">
-            <Flame /> Popular
-          </Tag>
-        )}
-        {product.originalPrice && (
-          <Tag color="blue" className="absolute top-2 right-2">
-            Sale
-          </Tag>
-        )}
-      </div>
-      <div className="p-3">
-        <h3 className="font-semibold text-gray-900 mb-2 text-sm line-clamp-2">
-          {product.name}
-        </h3>
-        <div className="flex items-center space-x-2 mb-2">
-          <Rate disabled value={product.rating} />
-          <span className="text-xs text-gray-500">({product.reviewCount})</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="font-semibold text-base">${product.price}</span>
-            {product.originalPrice && (
-              <span className="line-through text-gray-500 ml-2 text-sm">
-                ${product.originalPrice}
-              </span>
-            )}
-          </div>
-          <span className="text-xs text-gray-500">{product.category}</span>
-        </div>
-        <div className="mt-3">
-          <GradientButton 
-            variant="blue-purple" 
-            size="sm"
-            onClick={() => addToCart(product)}
-            className="w-full"
-          >
-            Add to Cart
-          </GradientButton>
-        </div>
-      </div>
-    </Card>
-  );
+  // Use shared ProductCard component that already links to detail page
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 max-w-7xl mx-auto">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg"></div>
-          <span className="text-xl font-bold text-gray-900">MelikShop</span>
-        </div>
-        
-        {/* Navigation Links */}
-        <div className="hidden md:flex items-center space-x-8">
-          <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-            Ana Sayfa
-          </Link>
-          <Link href="/products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-            Ürünler
-          </Link>
-        </div>
+      {/* Header is provided by GlobalHeader in layout */}
 
-        {/* Right Side Icons */}
-        <div className="flex items-center space-x-4">
-          <Link href="/register" className="text-gray-600 hover:text-gray-900 transition-colors">
-            Sign In
-          </Link>
-          <Link href="/register">
-            <GradientButton 
-              variant="blue-purple"
-              size="lg"
-            >
-              Hesabınız yok mu? Kaydol
-            </GradientButton>
-          </Link>
-          
-          {/* Shopping Cart Icon */}
-          <Button 
-            variant="ghost"
-            onClick={() => setIsCartOpen(true)}
-            className="relative hover:text-blue-600"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
-              <span></span>
-            </Badge>
-          </Button>
-          
-          {/* Profile Icon */}
-          <Link href="/dashboard">
-            <Button 
-              variant="ghost"
-              className="hover:text-blue-600"
-            >
-              <User className="w-5 h-5" />
-              Profil
-            </Button>
-          </Link>
-          
-          {/* Admin Icon */}
-          <Link href="/admin">
-            <Button 
-              variant="ghost"
-              className="hover:text-blue-600"
-            >
-              <BarChart3 className="w-5 h-5" />
-              Admin
-            </Button>
-          </Link>
-        </div>
-      </nav>
-
-      {/* Mobile Navigation */}
-      <div className="md:hidden bg-white border-t border-gray-200">
-        <div className="flex items-center justify-around py-3">
-          <Link href="/" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <HomeIcon className="text-lg mb-1" />
-            <span>Ana Sayfa</span>
-          </Link>
-
-          <Link href="/products" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <ShoppingBag className="text-lg mb-1" />
-            <span>Ürünler</span>
-          </Link>
-          <Button 
-            variant="ghost"
-            className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600 relative"
-            onClick={() => setIsCartOpen(true)}
-          >
-            <ShoppingBag className="text-lg mb-1" />
-            <span>Sepetim</span>
-            <Badge count={totalItems} size="sm" className="absolute -top-1 -right-1">
-              <span></span>
-            </Badge>
-          </Button>
-          <Link href="/dashboard" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <User className="text-lg mb-1" />
-            <span>Profilim</span>
-          </Link>
-          <Link href="/admin" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
-            <BarChart3 className="text-lg mb-1" />
-            <span>Admin</span>
-          </Link>
-        </div>
-      </div>
+      {/* Mobile nav removed; use GlobalHeader only */}
 
       {/* Hero Section with Carousel */}
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -468,7 +343,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {popularProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCardComp key={product.id} product={product} onAddToCart={addToCart} />
             ))}
           </div>
         )}
@@ -506,7 +381,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {newProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCardComp key={product.id} product={product} onAddToCart={addToCart} />
             ))}
           </div>
         )}

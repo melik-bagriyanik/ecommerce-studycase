@@ -44,11 +44,12 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
                 <Clock className="w-3 h-3" /> New
               </Tag>
             )}
-            {product.isPopular && (
-              <Tag color="red" className="text-xs">
-                <Flame className="w-3 h-3" /> Popular
-              </Tag>
-            )}
+         {Boolean(product.isPopular) && (
+  <Tag color="red" className="text-xs">
+    <Flame className="w-3 h-3" /> Popular
+  </Tag>
+)}
+
           </div>
           
           {product.originalPrice && (
@@ -86,8 +87,11 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             <GradientButton 
               variant="blue-purple" 
               size="sm"
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={() => {
+                // Prevent navigation when adding to cart
+                if (typeof window !== 'undefined') {
+                  window.event?.preventDefault();
+                }
                 onAddToCart(product);
               }}
               className="w-full"

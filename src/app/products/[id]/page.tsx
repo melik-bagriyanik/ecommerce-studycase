@@ -36,36 +36,6 @@ import { ProductRecommendations } from '../../components/products';
 import { useCart } from '../../context/CartContext';
 import axios from 'axios';
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  description: string;
-  longDescription: string;
-  images: string[];
-  category: number;
-  rating: number;
-  reviewCount: number;
-  inStock: boolean;
-  stockQuantity: number;
-  isNew?: boolean;
-  isPopular?: boolean;
-  specifications: {
-    [key: string]: string;
-  };
-  reviews: Review[];
-}
-
-interface Review {
-  id: number;
-  user: string;
-  rating: number;
-  date: string;
-  comment: string;
-  helpful: number;
-}
-
 interface RelatedProduct {
   id: number;
   name: string;
@@ -87,7 +57,6 @@ function ProductDetailContent() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const [recentlyViewed, setRecentlyViewed] = useState<string[]>([]);
   const [product, setProduct] = useState<any>(null);
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -205,86 +174,6 @@ function ProductDetailContent() {
     }
   }, [productId, product]);
 
-  const relatedProducts: RelatedProduct[] = [
-    {
-      id: 1,
-      name: 'iPhone 15 Pro Max 256GB Titanium',
-      price: 1199.99,
-      originalPrice: 1299.99,
-      image: '/iphone-1.jpg',
-      rating: 4.8,
-      reviewCount: 1247,
-      isNew: true,
-      isPopular: true
-    },
-    {
-      id: 2,
-      name: 'Samsung Galaxy S24 Ultra 512GB',
-      price: 1099.99,
-      originalPrice: 1199.99,
-      image: '/samsung-1.jpg',
-      rating: 4.6,
-      reviewCount: 892,
-      isNew: true,
-      isPopular: false
-    },
-    {
-      id: 3,
-      name: 'Nike Air Max 270',
-      price: 129.99,
-      originalPrice: 159.99,
-      image: '/nike-1.jpg',
-      rating: 4.7,
-      reviewCount: 456,
-      isNew: false,
-      isPopular: true
-    },
-    {
-      id: 4,
-      name: 'Adidas Ultraboost 22',
-      price: 189.99,
-      originalPrice: 209.99,
-      image: '/adidas-1.jpg',
-      rating: 4.9,
-      reviewCount: 678,
-      isNew: true,
-      isPopular: false
-    },
-    {
-      id: 5,
-      name: 'Harry Potter Complete Set',
-      price: 79.99,
-      originalPrice: 99.99,
-      image: '/harry-potter-1.jpg',
-      rating: 4.9,
-      reviewCount: 2156,
-      isNew: true,
-      isPopular: true
-    },
-    {
-      id: 6,
-      name: 'LEGO Star Wars Millennium Falcon',
-      price: 159.99,
-      originalPrice: 179.99,
-      image: '/lego-1.jpg',
-      rating: 4.8,
-      reviewCount: 789,
-      isNew: true,
-      isPopular: true
-    },
-    {
-      id: 7,
-      name: 'MacBook Pro 14" M3 Pro',
-      price: 2499.99,
-      originalPrice: 2699.99,
-      image: '/macbook-1.jpg',
-      rating: 4.9,
-      reviewCount: 567,
-      isNew: true,
-      isPopular: false
-    }
-  ];
-
   // Loading state
   if (loading) {
     return (
@@ -385,61 +274,7 @@ function ProductDetailContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 max-w-7xl mx-auto">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg"></div>
-          <span className="text-xl font-bold text-gray-900">MelikShop</span>
-        </div>
-        
-        {/* Navigation Links */}
-        <div className="hidden md:flex items-center space-x-8">
-          <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-            Ana Sayfa
-          </Link>
-          <Link href="/products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-            Ürünler
-          </Link>
-        </div>
-
-        {/* Right Side Icons */}
-        <div className="flex items-center space-x-4">
-          <Link href="/register" className="text-gray-600 hover:text-gray-900 transition-colors">
-            Sign In
-          </Link>
-          <Link href="/register">
-            <GradientButton 
-              variant="blue-purple"
-              size="lg"
-            >
-              Hesabınız yok mu? Kaydol
-            </GradientButton>
-          </Link>
-          
-          {/* Shopping Cart Icon */}
-          <Button 
-            variant="ghost"
-            onClick={() => setIsCartOpen(true)}
-            className="relative hover:text-blue-600"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
-              <span></span>
-            </Badge>
-          </Button>
-          
-          {/* Profile Icon */}
-          <Link href="/profile">
-            <Button 
-              variant="ghost"
-              className="hover:text-blue-600"
-            >
-              <User className="w-5 h-5" />
-              Profil
-            </Button>
-          </Link>
-        </div>
-      </nav>
+      {/* GlobalHeader is injected from layout; remove local nav */}
 
       {/* Mobile Navigation */}
       <div className="md:hidden bg-white border-t border-gray-200">
@@ -511,7 +346,7 @@ function ProductDetailContent() {
                   <Clock /> New
                 </Tag>
               )}
-              {product.isPopular && (
+              {Boolean(product.isPopular) && (
                 <Tag color="red" className="absolute top-4 left-4">
                   <Flame /> Popular
                 </Tag>
