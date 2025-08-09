@@ -19,6 +19,7 @@ import {
   ProductsFooter,
   ProductsFiltersDrawer
 } from '../components/products';
+import ProductsFiltersDesktop from '../components/products/ProductsFiltersDesktop';
 import CartSidebar from '../components/CartSidebar';
 import { Product } from '../types/Product';
 
@@ -55,11 +56,14 @@ function ProductsContent() {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'rating' | 'newest'>('name');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [maxPrice, setMaxPrice] = useState<number>(10000);
   const [showInStockOnly, setShowInStockOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [showDiscountedOnly, setShowDiscountedOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(50);
 
@@ -68,6 +72,9 @@ function ProductsContent() {
   
   // Backend'den gelen kategori isimlerini kullanarak dinamik map oluştur
   const [dynamicCategoryMap, setDynamicCategoryMap] = useState<Record<string, number>>({});
+  
+  // Markaları ürünlerden çıkar
+  const [brands, setBrands] = useState<string[]>([]);
 
   // API'den ürünleri çek
   useEffect(() => {
@@ -102,6 +109,7 @@ function ProductsContent() {
           originalPrice: item.originalPrice,
           image: item.thumbnail || (item.images && item.images[0]) || '',
           category: item.category,
+          brand: item.brand,
           rating: item.rating || 0,
           reviewCount: item.reviewCount || 0,
           description: item.description || '',
@@ -135,6 +143,20 @@ function ProductsContent() {
         setDynamicCategoryMap(dynamicMap);
         console.log('Dynamic category map:', dynamicMap);
         console.log('API Categories:', apiCategories);
+        
+        // Max price hesapla ve priceRange'i başlangıçta ayarla
+        const computedMaxPrice = mappedProducts.length > 0
+          ? Math.max(...mappedProducts.map((p) => Number(p.price) || 0))
+          : 10000;
+        const normalizedMax = Math.max(0, Math.ceil(computedMaxPrice));
+        setMaxPrice(normalizedMax);
+        setPriceRange(([min]) => [min ?? 0, normalizedMax]);
+        console.log('Computed max price:', normalizedMax);
+
+        // Markaları çıkar
+        const apiBrands = [...new Set(apiProducts.map((p: any) => p.brand).filter(Boolean))] as string[];
+        setBrands(apiBrands);
+        console.log('API Brands:', apiBrands);
         console.log('=== END API RESPONSE DEBUG ===');
 
         setProducts(mappedProducts);
@@ -316,6 +338,24 @@ function ProductsContent() {
       console.log('No rating filter applied - showing all products');
     }
     
+    // Marka filtresi
+    if (selectedBrands.length > 0) {
+      const beforeBrand = filtered.length;
+      filtered = filtered.filter(product => selectedBrands.includes(product.brand || ''));
+      console.log(`Brand filter: ${beforeBrand} → ${filtered.length} products`);
+    } else {
+      console.log('No brand filter applied - showing all products');
+    }
+    
+    // İndirim filtresi
+    if (showDiscountedOnly) {
+      const beforeDiscount = filtered.length;
+      filtered = filtered.filter(product => product.originalPrice && product.originalPrice > product.price);
+      console.log(`Discount filter: ${beforeDiscount} → ${filtered.length} products`);
+    } else {
+      console.log('No discount filter applied - showing all products');
+    }
+    
     // Sıralama
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -345,7 +385,7 @@ function ProductsContent() {
     
     setFilteredProducts(filtered);
     setCurrentPage(1);
-  }, [products, selectedCategories, filterType, debouncedSearchQuery, priceRange, showInStockOnly, selectedRatings, sortBy]);
+  }, [products, selectedCategories, filterType, debouncedSearchQuery, priceRange, showInStockOnly, selectedRatings, sortBy, selectedBrands, showDiscountedOnly]);
 
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * pageSize,
@@ -390,9 +430,21 @@ function ProductsContent() {
           categories={Object.entries(dynamicCategoryMap).map(([name, id]) => ({ id, name }))}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
-          onFiltersOpen={() => setShowFilters(true)}
+          onFiltersOpen={() => {
+            console.log('Opening filters, current showFilters:', showFilters);
+            setShowFilters(true);
+          }}
           filteredProductsCount={filteredProducts.length}
           router={router}
+          selectedBrands={selectedBrands}
+          onBrandChange={setSelectedBrands}
+          brands={brands}
+          showDiscountedOnly={showDiscountedOnly}
+          onDiscountedChange={setShowDiscountedOnly}
+          selectedRatings={selectedRatings}
+          showInStockOnly={showInStockOnly}
+          priceRange={priceRange}
+          maxPrice={maxPrice}
         />
 
         {/* Loading State */}
@@ -431,10 +483,13 @@ function ProductsContent() {
       {/* Footer */}
       <ProductsFooter />
 
-      {/* Filters Drawer */}
+      {/* Filters Drawer - Mobile */}
       <ProductsFiltersDrawer
         isOpen={showFilters}
-        onClose={() => setShowFilters(false)}
+        onClose={() => {
+          console.log('Closing mobile filters, showFilters:', showFilters);
+          setShowFilters(false);
+        }}
         selectedCategories={selectedCategories}
         onCategoryChange={setSelectedCategories}
         selectedRatings={selectedRatings}
@@ -447,6 +502,39 @@ function ProductsContent() {
         onSearchChange={setSearchQuery}
         categories={Object.entries(dynamicCategoryMap).map(([name, id]) => ({ id, name }))}
         router={router}
+        selectedBrands={selectedBrands}
+        onBrandChange={setSelectedBrands}
+        brands={brands}
+        showDiscountedOnly={showDiscountedOnly}
+        onDiscountedChange={setShowDiscountedOnly}
+        maxPrice={maxPrice}
+      />
+
+      {/* Filters Desktop - Desktop */}
+      <ProductsFiltersDesktop
+        isOpen={showFilters}
+        onClose={() => {
+          console.log('Closing desktop filters, showFilters:', showFilters);
+          setShowFilters(false);
+        }}
+        selectedCategories={selectedCategories}
+        onCategoryChange={setSelectedCategories}
+        selectedRatings={selectedRatings}
+        onRatingChange={setSelectedRatings}
+        priceRange={priceRange}
+        onPriceRangeChange={setPriceRange}
+        showInStockOnly={showInStockOnly}
+        onStockFilterChange={setShowInStockOnly}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        categories={Object.entries(dynamicCategoryMap).map(([name, id]) => ({ id, name }))}
+        router={router}
+        selectedBrands={selectedBrands}
+        onBrandChange={setSelectedBrands}
+        brands={brands}
+        showDiscountedOnly={showDiscountedOnly}
+        onDiscountedChange={setShowDiscountedOnly}
+        maxPrice={maxPrice}
       />
 
       {/* Cart Sidebar */}

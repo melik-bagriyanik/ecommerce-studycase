@@ -1,6 +1,7 @@
 import { Search, Filter, Grid3X3, List, X } from 'lucide-react';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import Badge from '../ui/Badge';
 
 interface ProductsFiltersProps {
   searchQuery: string;
@@ -15,6 +16,16 @@ interface ProductsFiltersProps {
   onFiltersOpen: () => void;
   filteredProductsCount: number;
   router: any;
+  selectedBrands: string[];
+  onBrandChange: (brands: string[]) => void;
+  brands: string[];
+  showDiscountedOnly: boolean;
+  onDiscountedChange: (show: boolean) => void;
+  // for badge
+  selectedRatings?: number[];
+  showInStockOnly?: boolean;
+  priceRange?: [number, number];
+  maxPrice?: number;
 }
 
 export default function ProductsFilters({
@@ -29,8 +40,25 @@ export default function ProductsFilters({
   onViewModeChange,
   onFiltersOpen,
   filteredProductsCount,
-  router
+  router,
+  selectedBrands,
+  onBrandChange,
+  brands,
+  showDiscountedOnly,
+  onDiscountedChange,
+  selectedRatings = [],
+  showInStockOnly = false,
+  priceRange = [0, 0],
+  maxPrice = 0
 }: ProductsFiltersProps) {
+  const activeFiltersCount = (
+    (selectedCategories.length > 0 ? 1 : 0) +
+    (selectedBrands.length > 0 ? 1 : 0) +
+    (selectedRatings.length > 0 ? 1 : 0) +
+    (showInStockOnly ? 1 : 0) +
+    (showDiscountedOnly ? 1 : 0) +
+    ((priceRange[0] > 0 || (maxPrice > 0 && priceRange[1] < maxPrice)) ? 1 : 0)
+  );
   return (
     <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-6 md:mb-8">
       {/* Mobile Layout */}
@@ -52,7 +80,10 @@ export default function ProductsFilters({
           <Button
             size="sm"
             icon={<Filter className="text-gray-500" />}
-            onClick={onFiltersOpen}
+            onClick={() => {
+              console.log('Mobile filters button clicked');
+              onFiltersOpen();
+            }}
             className="flex-1"
           >
             Filtreler
@@ -114,6 +145,8 @@ export default function ProductsFilters({
             ))}
           </select>
         </div>
+        
+
         
         {/* Mobile Results Count */}
         <div className="text-center">
@@ -178,14 +211,24 @@ export default function ProductsFilters({
         </div>
         
         <div>
-          <Button
-            size="lg"
-            icon={<Filter className="text-gray-500" />}
-            onClick={onFiltersOpen}
-            className="w-full"
-          >
-            Filtreler
-          </Button>
+          <div className="relative">
+            <Button
+              size="lg"
+              icon={<Filter className="text-gray-500" />}
+              onClick={() => {
+                console.log('Filters button clicked');
+                onFiltersOpen();
+              }}
+              className="w-full"
+            >
+              Filtreler
+            </Button>
+            {activeFiltersCount > 0 && (
+              <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-blue-600 text-white text-xs w-6 h-6">
+                {activeFiltersCount}
+              </span>
+            )}
+          </div>
         </div>
         
         <div>
