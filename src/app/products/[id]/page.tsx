@@ -93,6 +93,8 @@ function ProductDetailContent() {
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [frequentlyItems, setFrequentlyItems] = useState<any[]>([]);
+  const [selectedBundleIds, setSelectedBundleIds] = useState<string[]>([]);
 
   // Fetch product data from API
   useEffect(() => {
@@ -150,6 +152,36 @@ function ProductDetailContent() {
         console.log("Product thumbnail:", productData.thumbnail);
         setProduct(mappedProduct);
         setAllProducts(allProductsData);
+
+        // Compute frequently bought together (simple heuristic: same category, popular or high rating)
+        try {
+          const sameCategory = allProductsData
+            .filter((p: any) => (p._id || p.id) !== (productData._id || productData.id) && p.category === productData.category);
+          const scored = sameCategory
+            .map((p: any) => ({
+              raw: p,
+              score:
+                (p.isPopular ? 2 : 0) +
+                (typeof p.rating === 'number' ? p.rating / 5 : 0) +
+                (typeof p.reviewCount === 'number' ? Math.min(p.reviewCount, 1000) / 1000 : 0)
+            }))
+            .sort((a: any, b: any) => b.score - a.score)
+            .slice(0, 3)
+            .map((s: any) => s.raw);
+          const mappedFrequently = scored.map((item: any) => ({
+            id: item._id || item.id,
+            name: item.name,
+            price: Number(item.price) || 0,
+            image: item.thumbnail || (Array.isArray(item.images) && item.images[0]) || '',
+            originalPrice: item.originalPrice
+          }));
+          setFrequentlyItems(mappedFrequently);
+          setSelectedBundleIds(mappedFrequently.map((i: any) => i.id));
+        } catch (e) {
+          console.warn('Failed to build frequently bought together list', e);
+          setFrequentlyItems([]);
+          setSelectedBundleIds([]);
+        }
       } catch (err: any) {
         console.error('Error fetching product:', err);
         setError(err.response?.data?.message || 'Ürün yüklenirken bir hata oluştu');
@@ -321,6 +353,34 @@ function ProductDetailContent() {
       return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
     }
     return 0;
+  };
+
+  const bundleTotal = (() => {
+    const selectedItems = frequentlyItems.filter((i: any) => selectedBundleIds.includes(i.id));
+    const addonsTotal = selectedItems.reduce((sum: number, i: any) => sum + (Number(i.price) || 0), 0);
+    return (Number(product.price) || 0) + addonsTotal;
+  })();
+
+  const toggleBundleItem = (id: string) => {
+    setSelectedBundleIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const addBundleToCart = () => {
+    // add main product
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images?.[0] || '',
+      originalPrice: product.originalPrice
+    });
+    // add selected frequently items
+    frequentlyItems.forEach((i: any) => {
+      if (selectedBundleIds.includes(i.id)) {
+        addToCart({ id: i.id, name: i.name, price: i.price, image: i.image, originalPrice: i.originalPrice });
+      }
+    });
+    alert('Seçili ürünler sepete eklendi');
   };
 
   return (
@@ -618,14 +678,47 @@ function ProductDetailContent() {
           </div>
         )}
 
-        {/* AI Recommendations */}
-        {allProducts.length > 0 && (
+        {/* Frequently Bought Together */}
+        {frequentlyItems.length > 0 && (
           <div className="mt-16">
-            <ProductRecommendations
-              currentProduct={product}
-              allProducts={allProducts}
-              onAddToCart={handleAddToCart}
-            />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Sıkça Birlikte Alınanlar</h2>
+            <p className="text-sm text-gray-500 mb-6">Bu ürünle birlikte sıkça tercih edilen ürünler</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {frequentlyItems.map((item: any) => (
+                <Card key={item.id} className="p-4">
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedBundleIds.includes(item.id)}
+                      onChange={() => toggleBundleItem(item.id)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex items-center justify-center">
+                          {item.image ? (
+                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Package className="text-gray-400" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-gray-900 line-clamp-2">{item.name}</h4>
+                          <div className="text-sm font-semibold text-gray-900 mt-1">${item.price}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+                </Card>
+              ))}
+            </div>
+            <div className="mt-6 flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="text-sm text-gray-700">Toplam (ana ürün + seçilenler): <span className="font-bold text-gray-900">${bundleTotal.toFixed(2)}</span></div>
+              <div className="space-x-3">
+                <Button variant="outline" onClick={() => setSelectedBundleIds(frequentlyItems.map(i => i.id))}>Tümünü Seç</Button>
+                <GradientButton variant="blue-purple" onClick={addBundleToCart}>Sepete Ekle</GradientButton>
+              </div>
+            </div>
           </div>
         )}
 
