@@ -46,6 +46,8 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
     
     if (!token) {
       // Giriş yapmamışsa login sayfasına yönlendir
+      // Önce sepet sidebar'ını kapat
+      handleClose();
       router.push('/login');
       return;
     }
