@@ -6,31 +6,14 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { 
-  ShoppingCart, 
-  User, 
   Home as HomeIcon,
-  Package,
   ShoppingBag,
   Star,
-  Flame,
-  Clock,
-  ArrowLeft,
-  Minus,
-  Plus,
-  Heart,
-  Share2,
   BarChart3,
   Users,
   DollarSign,
   TrendingUp,
-  Eye,
-  Pencil,
-  Settings,
-  LogOut,
-  MapPin,
-  CreditCard,
-  Truck,
-  Check
+
 } from 'lucide-react';
 import axios from 'axios';
 

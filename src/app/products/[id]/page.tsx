@@ -3,8 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Thumbs } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -15,12 +13,11 @@ import Badge from '../../components/ui/Badge';
 import Tag from '../../components/ui/Tag';
 import Rate from '../../components/ui/Rate';
 import { 
-  ShoppingCart, 
+
   User, 
   Home as HomeIcon,
   Package,
   ShoppingBag,
-  Star,
   Flame,
   Clock,
   ArrowLeft,
@@ -28,7 +25,6 @@ import {
   Plus,
   Heart,
   Share2,
-  BarChart3
 } from 'lucide-react';
 import CartSidebar from '../../components/CartSidebar';
 import GradientButton from '../../components/GradientButton';

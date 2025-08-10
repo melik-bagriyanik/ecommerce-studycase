@@ -15,6 +15,7 @@ interface InputProps {
   suffix?: React.ReactNode;
   onPressEnter?: () => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  maxLength?: number;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -32,6 +33,7 @@ const Input: React.FC<InputProps> = ({
   suffix,
   onPressEnter,
   onKeyDown,
+  maxLength,
 }) => {
   const baseClasses = 'w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200';
   
@@ -76,6 +78,7 @@ const Input: React.FC<InputProps> = ({
           placeholder={placeholder}
           disabled={disabled}
           required={required}
+          maxLength={maxLength}
           className={`${classes} ${prefix ? 'pl-10' : ''} ${suffix ? 'pr-10' : ''}`}
           onKeyDown={handleKeyDown}
         />

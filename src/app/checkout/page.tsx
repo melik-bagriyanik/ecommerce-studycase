@@ -8,32 +8,9 @@ import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import { 
-  ShoppingCart, 
-  User, 
   Home as HomeIcon,
-  Package,
-  ShoppingBag,
-  Star,
-  Flame,
-  Clock,
   ArrowLeft,
-  Minus,
-  Plus,
-  Heart,
-  Share2,
-  BarChart3,
-  Users,
-  DollarSign,
-  TrendingUp,
-  Eye,
-  Pencil,
-  Settings,
-  LogOut,
-  MapPin,
-  CreditCard,
-  Truck,
   Check,
-  Trash2,
   AlertCircle
 } from 'lucide-react';
 
