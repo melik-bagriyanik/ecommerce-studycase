@@ -33,7 +33,8 @@ import {
   CreditCard,
   Truck,
   Check,
-  Trash2
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 
 interface CartItem {
@@ -62,6 +63,17 @@ interface PaymentMethod {
   icon: string;
 }
 
+interface CardDetails {
+  cardNumber: string;
+  cardHolder: string;
+  expiryDate: string;
+  cvv: string;
+}
+
+interface ValidationErrors {
+  [key: string]: string;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -74,6 +86,7 @@ export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
 
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     firstName: '',
@@ -84,6 +97,13 @@ export default function CheckoutPage() {
     city: '',
     postalCode: '',
     country: 'Türkiye'
+  });
+
+  const [cardDetails, setCardDetails] = useState<CardDetails>({
+    cardNumber: '',
+    cardHolder: '',
+    expiryDate: '',
+    cvv: ''
   });
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('credit-card');
@@ -109,6 +129,58 @@ export default function CheckoutPage() {
     }
   ];
 
+  // Validation functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    const phoneRegex = /^[0-9\s\-\+\(\)]{10,}$/;
+    return phoneRegex.test(phone.replace(/\s/g, ''));
+  };
+
+  const validateCardNumber = (cardNumber: string): boolean => {
+    const cleanNumber = cardNumber.replace(/\s/g, '');
+    return /^\d{13,19}$/.test(cleanNumber);
+  };
+
+  const validateExpiryDate = (expiryDate: string): boolean => {
+    const regex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+    if (!regex.test(expiryDate)) return false;
+    
+    const [month, year] = expiryDate.split('/');
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear() % 100;
+    const currentMonth = currentDate.getMonth() + 1;
+    
+    const expYear = parseInt(year);
+    const expMonth = parseInt(month);
+    
+    if (expYear < currentYear) return false;
+    if (expYear === currentYear && expMonth < currentMonth) return false;
+    
+    return true;
+  };
+
+  const validateCVV = (cvv: string): boolean => {
+    return /^\d{3,4}$/.test(cvv);
+  };
+
+  const formatCardNumber = (value: string): string => {
+    const cleanValue = value.replace(/\s/g, '').replace(/\D/g, '');
+    const groups = cleanValue.match(/.{1,4}/g);
+    return groups ? groups.join(' ') : cleanValue;
+  };
+
+  const formatExpiryDate = (value: string): string => {
+    const cleanValue = value.replace(/\D/g, '');
+    if (cleanValue.length >= 2) {
+      return cleanValue.slice(0, 2) + '/' + cleanValue.slice(2, 4);
+    }
+    return cleanValue;
+  };
+
   useEffect(() => {
     // Load cart data from localStorage
     const savedCartItems = localStorage.getItem('cartItems');
@@ -128,16 +200,109 @@ export default function CheckoutPage() {
       ...prev,
       [field]: value
     }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleCardChange = (field: keyof CardDetails, value: string) => {
+    let formattedValue = value;
+    
+    if (field === 'cardNumber') {
+      formattedValue = formatCardNumber(value);
+    } else if (field === 'expiryDate') {
+      formattedValue = formatExpiryDate(value);
+    }
+    
+    setCardDetails(prev => ({
+      ...prev,
+      [field]: formattedValue
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateStep1 = (): boolean => {
+    const newErrors: ValidationErrors = {};
+    
+    // Required field validation
+    if (!shippingAddress.firstName.trim()) {
+      newErrors.firstName = 'Ad alanı zorunludur';
+    }
+    
+    if (!shippingAddress.lastName.trim()) {
+      newErrors.lastName = 'Soyad alanı zorunludur';
+    }
+    
+    if (!shippingAddress.email.trim()) {
+      newErrors.email = 'E-posta alanı zorunludur';
+    } else if (!validateEmail(shippingAddress.email)) {
+      newErrors.email = 'Geçerli bir e-posta adresi giriniz';
+    }
+    
+    if (!shippingAddress.phone.trim()) {
+      newErrors.phone = 'Telefon alanı zorunludur';
+    } else if (!validatePhone(shippingAddress.phone)) {
+      newErrors.phone = 'Geçerli bir telefon numarası giriniz';
+    }
+    
+    if (!shippingAddress.address.trim()) {
+      newErrors.address = 'Adres alanı zorunludur';
+    }
+    
+    if (!shippingAddress.city.trim()) {
+      newErrors.city = 'Şehir alanı zorunludur';
+    }
+    
+    if (!shippingAddress.postalCode.trim()) {
+      newErrors.postalCode = 'Posta kodu alanı zorunludur';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep2 = (): boolean => {
+    if (selectedPaymentMethod !== 'credit-card') {
+      return true; // Skip validation for non-credit card methods
+    }
+    
+    const newErrors: ValidationErrors = {};
+    
+    if (!cardDetails.cardNumber.trim()) {
+      newErrors.cardNumber = 'Kart numarası zorunludur';
+    } else if (!validateCardNumber(cardDetails.cardNumber)) {
+      newErrors.cardNumber = 'Geçerli bir kart numarası giriniz';
+    }
+    
+    if (!cardDetails.cardHolder.trim()) {
+      newErrors.cardHolder = 'Kart sahibi zorunludur';
+    }
+    
+    if (!cardDetails.expiryDate.trim()) {
+      newErrors.expiryDate = 'Son kullanma tarihi zorunludur';
+    } else if (!validateExpiryDate(cardDetails.expiryDate)) {
+      newErrors.expiryDate = 'Geçerli bir son kullanma tarihi giriniz (MM/YY)';
+    }
+    
+    if (!cardDetails.cvv.trim()) {
+      newErrors.cvv = 'CVV zorunludur';
+    } else if (!validateCVV(cardDetails.cvv)) {
+      newErrors.cvv = 'Geçerli bir CVV giriniz (3-4 haneli)';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleNextStep = () => {
     if (currentStep === 1) {
-      // Validate shipping address
-      const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'postalCode'];
-      const isValid = requiredFields.every(field => shippingAddress[field as keyof ShippingAddress].trim() !== '');
-      
-      if (!isValid) {
-        alert('Lütfen tüm gerekli alanları doldurun.');
+      if (!validateStep1()) {
         return;
       }
     }
@@ -150,6 +315,10 @@ export default function CheckoutPage() {
   };
 
   const handlePayment = async () => {
+    if (!validateStep2()) {
+      return;
+    }
+    
     setIsProcessing(true);
     
     // Simulate payment processing
@@ -236,36 +405,72 @@ export default function CheckoutPage() {
                 <div className="p-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-6">Teslimat Adresi</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                      label="Ad"
-                      placeholder="Adınızı girin"
-                      value={shippingAddress.firstName}
-                      onChange={(e) => handleAddressChange('firstName', e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Soyad"
-                      placeholder="Soyadınızı girin"
-                      value={shippingAddress.lastName}
-                      onChange={(e) => handleAddressChange('lastName', e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="E-posta"
-                      type="email"
-                      placeholder="ornek@email.com"
-                      value={shippingAddress.email}
-                      onChange={(e) => handleAddressChange('email', e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Telefon"
-                      type="tel"
-                      placeholder="0555 123 45 67"
-                      value={shippingAddress.phone}
-                      onChange={(e) => handleAddressChange('phone', e.target.value)}
-                      required
-                    />
+                    <div>
+                      <Input
+                        label="Ad"
+                        placeholder="Adınızı girin"
+                        value={shippingAddress.firstName}
+                        onChange={(e) => handleAddressChange('firstName', e.target.value)}
+                        required
+                        className={errors.firstName ? 'border-red-500' : ''}
+                      />
+                      {errors.firstName && (
+                        <div className="flex items-center mt-1 text-red-600 text-sm">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.firstName}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        label="Soyad"
+                        placeholder="Soyadınızı girin"
+                        value={shippingAddress.lastName}
+                        onChange={(e) => handleAddressChange('lastName', e.target.value)}
+                        required
+                        className={errors.lastName ? 'border-red-500' : ''}
+                      />
+                      {errors.lastName && (
+                        <div className="flex items-center mt-1 text-red-600 text-sm">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.lastName}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        label="E-posta"
+                        type="email"
+                        placeholder="ornek@email.com"
+                        value={shippingAddress.email}
+                        onChange={(e) => handleAddressChange('email', e.target.value)}
+                        required
+                        className={errors.email ? 'border-red-500' : ''}
+                      />
+                      {errors.email && (
+                        <div className="flex items-center mt-1 text-red-600 text-sm">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.email}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        label="Telefon"
+                        type="tel"
+                        placeholder="0555 123 45 67"
+                        value={shippingAddress.phone}
+                        onChange={(e) => handleAddressChange('phone', e.target.value)}
+                        required
+                        className={errors.phone ? 'border-red-500' : ''}
+                      />
+                      {errors.phone && (
+                        <div className="flex items-center mt-1 text-red-600 text-sm">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.phone}
+                        </div>
+                      )}
+                    </div>
                     <div className="md:col-span-2">
                       <Input
                         label="Adres"
@@ -273,25 +478,49 @@ export default function CheckoutPage() {
                         value={shippingAddress.address}
                         onChange={(e) => handleAddressChange('address', e.target.value)}
                         required
+                        className={errors.address ? 'border-red-500' : ''}
                       />
+                      {errors.address && (
+                        <div className="flex items-center mt-1 text-red-600 text-sm">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.address}
+                        </div>
+                      )}
                     </div>
-                    <Input
-                      label="Şehir"
-                      placeholder="İstanbul, Ankara, İzmir..."
-                      value={shippingAddress.city}
-                      onChange={(e) => handleAddressChange('city', e.target.value)}
-                      required
-                    />
-                    <Input
-                      label="Posta Kodu"
-                      placeholder="34000"
-                      value={shippingAddress.postalCode}
-                      onChange={(e) => handleAddressChange('postalCode', e.target.value)}
-                      required
-                    />
+                    <div>
+                      <Input
+                        label="Şehir"
+                        placeholder="İstanbul, Ankara, İzmir..."
+                        value={shippingAddress.city}
+                        onChange={(e) => handleAddressChange('city', e.target.value)}
+                        required
+                        className={errors.city ? 'border-red-500' : ''}
+                      />
+                      {errors.city && (
+                        <div className="flex items-center mt-1 text-red-600 text-sm">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.city}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        label="Posta Kodu"
+                        placeholder="34000"
+                        value={shippingAddress.postalCode}
+                        onChange={(e) => handleAddressChange('postalCode', e.target.value)}
+                        required
+                        className={errors.postalCode ? 'border-red-500' : ''}
+                      />
+                      {errors.postalCode && (
+                        <div className="flex items-center mt-1 text-red-600 text-sm">
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          {errors.postalCode}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
-                
                   <div className="mt-6">
                     <Button onClick={handleNextStep} className="w-full">
                       Devam Et
@@ -342,26 +571,73 @@ export default function CheckoutPage() {
                     <div className="border border-gray-200 rounded-lg p-4 mb-6">
                       <h3 className="font-medium text-gray-900 mb-4">Kart Bilgileri</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          label="Kart Numarası"
-                          placeholder="1234 5678 9012 3456"
-                          required
-                        />
-                        <Input
-                          label="Kart Sahibi"
-                          placeholder="Ad Soyad"
-                          required
-                        />
-                        <Input
-                          label="Son Kullanma Tarihi"
-                          placeholder="MM/YY"
-                          required
-                        />
-                        <Input
-                          label="CVV"
-                          placeholder="123"
-                          required
-                        />
+                        <div>
+                          <Input
+                            label="Kart Numarası"
+                            placeholder="1234 5678 9012 3456"
+                            value={cardDetails.cardNumber}
+                            onChange={(e) => handleCardChange('cardNumber', e.target.value)}
+                            maxLength={19}
+                            required
+                            className={errors.cardNumber ? 'border-red-500' : ''}
+                          />
+                          {errors.cardNumber && (
+                            <div className="flex items-center mt-1 text-red-600 text-sm">
+                              <AlertCircle className="w-4 h-4 mr-1" />
+                              {errors.cardNumber}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <Input
+                            label="Kart Sahibi"
+                            placeholder="Ad Soyad"
+                            value={cardDetails.cardHolder}
+                            onChange={(e) => handleCardChange('cardHolder', e.target.value)}
+                            required
+                            className={errors.cardHolder ? 'border-red-500' : ''}
+                          />
+                          {errors.cardHolder && (
+                            <div className="flex items-center mt-1 text-red-600 text-sm">
+                              <AlertCircle className="w-4 h-4 mr-1" />
+                              {errors.cardHolder}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <Input
+                            label="Son Kullanma Tarihi"
+                            placeholder="MM/YY"
+                            value={cardDetails.expiryDate}
+                            onChange={(e) => handleCardChange('expiryDate', e.target.value)}
+                            maxLength={5}
+                            required
+                            className={errors.expiryDate ? 'border-red-500' : ''}
+                          />
+                          {errors.expiryDate && (
+                            <div className="flex items-center mt-1 text-red-600 text-sm">
+                              <AlertCircle className="w-4 h-4 mr-1" />
+                              {errors.expiryDate}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <Input
+                            label="CVV"
+                            placeholder="123"
+                            value={cardDetails.cvv}
+                            onChange={(e) => handleCardChange('cvv', e.target.value)}
+                            maxLength={4}
+                            required
+                            className={errors.cvv ? 'border-red-500' : ''}
+                          />
+                          {errors.cvv && (
+                            <div className="flex items-center mt-1 text-red-600 text-sm">
+                              <AlertCircle className="w-4 h-4 mr-1" />
+                              {errors.cvv}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
