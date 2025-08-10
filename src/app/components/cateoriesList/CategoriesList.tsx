@@ -22,7 +22,7 @@ const Categories: React.FC = () => {
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem("token");
-    console.log(`${process.env.API_BASE_URL}`, token);
+    console.log(`${process.env.NEXT_PUBLIC_API_BASE_URL}`, token);
     axios
       .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/category`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -57,13 +57,13 @@ const Categories: React.FC = () => {
     
     // If it's a relative path, try port 3000 first (your backend)
     if (imagePath.startsWith('/')) {
-      const fullUrl = `${process.env.API_BASE_URL}${imagePath}`;
+      const fullUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}${imagePath}`;
       console.log("Constructed URL:", fullUrl);
       return fullUrl;
     }
     
     // If it doesn't start with /, assume it's a relative path
-    const fullUrl = `${process.env.API_BASE_URL}/${imagePath}`;
+    const fullUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${imagePath}`;
     console.log("Constructed URL:", fullUrl);
     return fullUrl;
   };
