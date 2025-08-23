@@ -297,7 +297,7 @@ export default function ProductsFiltersDesktop({
                           className="mr-3"
                         />
                         <Rate disabled value={rating} />
-                        <span className="ml-2 text-sm">{rating}+ yıldız</span>
+                     
                       </div>
                       <span className="text-xs text-gray-500">
                         {rating === 5 ? 'Mükemmel' : 
