@@ -11,6 +11,8 @@ interface RecommendationRequest {
 interface RecommendationResponse {
   recommendedProductIds: string[];
   reasoning: string;
+  rateLimited?: boolean;
+  message?: string;
 }
 
 export async function getProductRecommendations(
@@ -60,11 +62,20 @@ export async function getProductRecommendations(
       }),
     });
 
+    const data = await response.json();
+
+    // Handle rate limit response
+    if (response.status === 429) {
+      return {
+        ...data,
+        rateLimited: true
+      };
+    }
+
     if (!response.ok) {
       throw new Error('Öneri sistemi şu anda kullanılamıyor');
     }
 
-    const data = await response.json();
     return data;
   } catch (error) {
     console.error('Öneri sistemi hatası:', error);
@@ -77,7 +88,8 @@ export async function getProductRecommendations(
 
     return {
       recommendedProductIds: sameCategoryProducts.map(p => String(p.id)),
-      reasoning: `Aynı kategorideki (${productCategory}) benzer ürünler önerildi.`
+      reasoning: `Aynı kategorideki (${productCategory}) benzer ürünler önerildi.`,
+      rateLimited: true
     };
   }
 }

@@ -97,7 +97,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
             <span className="text-xs text-gray-500">({product.reviewCount})</span>
           </div>
           
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
             <div className="flex items-center space-x-2">
               <span className="font-bold text-lg text-gray-900">${product.price}</span>
               {product.originalPrice && (
@@ -106,7 +106,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
                 </span>
               )}
             </div>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full self-start sm:self-auto">
               {product.category}
             </span>
           </div>

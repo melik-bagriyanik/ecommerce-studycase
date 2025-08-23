@@ -16,8 +16,8 @@ export default function ProductsPagination({
   if (totalProducts === 0) return null;
 
   return (
-    <div className="text-center mt-8">
-      <div className="flex items-center justify-center space-x-2">
+    <div className="text-center mt-8 mb-8">
+      <div className="flex items-center justify-center space-x-1 sm:space-x-2 flex-wrap gap-2">
         <Button
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}

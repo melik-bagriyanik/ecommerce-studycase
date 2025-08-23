@@ -12,36 +12,11 @@ import axios from 'axios';
 import Button from './components/ui/Button';
 import Card from './components/ui/Card';
 import { 
-  ShoppingCart, 
-  User, 
   Home as HomeIcon,
-  Package,
-  ShoppingBag,
   Star,
   Shield,
   Headphones,
-  Mail,
-  Flame,
-  Clock,
-  Search,
-  BarChart3,
-  Heart,
-  Share2,
-  Minus,
-  Plus,
-  Trash2,
-  ArrowLeft,
-  Check,
-  CreditCard,
-  Truck,
-  Settings,
-  LogOut,
-  MapPin,
-  Eye,
-  Pencil,
-  Users,
-  DollarSign,
-  TrendingUp
+
 } from 'lucide-react';
 // CartSidebar shown globally via layout CartOverlay
 import GradientButton from './components/GradientButton';
@@ -255,7 +230,7 @@ export default function Home() {
                   <div className="relative z-10 flex items-center justify-center h-full">
                     <div className="text-center text-white px-8">
                       <h2 className="text-4xl md:text-6xl font-bold mb-4">{banner.title}</h2>
-                      <p className="text-xl md:text-2xl mb-8 opacity-90">{banner.subtitle}</p>
+                      <p className="text-xl md:text-2xl mb-8 mx-8 opacity-90">{banner.subtitle}</p>
                       <Link href={banner.buttonLink}>
                         <GradientButton 
                           variant="purple-pink"
@@ -322,20 +297,21 @@ export default function Home() {
       </div>
 
       {/* Featured Products */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="flex items-center justify-between mb-12">
+          <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-4">
           <div className="text-center md:text-left">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Öne Çıkan Ürünler</h2>
-            <p className="text-lg text-gray-600">
-              En çok tercih edilen ürünlerimizi keşfedin
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">Öne Çıkan Ürünler</h3>
+            <p className="text-md text-gray-600">
+            En çok tercih edilen ürünlerimizi keşfedin
             </p>
           </div>
-          <Link href="/products?filter=popular">
+          <Link href="/products?filter=new">
             <Button variant="outline" className="hidden md:block">
               Tümünü Gör
             </Button>
           </Link>
         </div>
+   
         
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -361,10 +337,10 @@ export default function Home() {
 
       {/* New Arrivals */}
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-4">
           <div className="text-center md:text-left">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Yeni Gelenler</h2>
-            <p className="text-lg text-gray-600">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">Yeni Gelenler</h3>
+            <p className="text-md text-gray-600">
               En son eklenen ürünlerimizi keşfedin
             </p>
           </div>

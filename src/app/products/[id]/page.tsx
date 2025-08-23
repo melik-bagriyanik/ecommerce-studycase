@@ -305,9 +305,7 @@ function ProductDetailContent() {
           >
             <ShoppingBag className="text-lg mb-1" />
             <span>Sepetim</span>
-            <Badge count={3} size="sm" className="absolute -top-1 -right-1">
-              <span></span>
-            </Badge>
+         
           </Button>
           <Link href="/profile" className="flex flex-col items-center text-xs text-gray-600 hover:text-blue-600">
             <User className="text-lg mb-1" />
@@ -336,7 +334,7 @@ function ProductDetailContent() {
           <span className="text-gray-900">{product.name}</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
           <div className="space-y-4">
             {/* Main Image */}
@@ -403,10 +401,10 @@ function ProductDetailContent() {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Product Title and Rating */}
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
               <div className="flex items-center space-x-4 mb-4">
                 <div className="flex items-center space-x-2">
                   {product.rating > 0 && <Rate disabled value={product.rating} />}
@@ -421,13 +419,13 @@ function ProductDetailContent() {
 
             {/* Price */}
             <div className="space-y-2">
-              <div className="flex items-center space-x-4">
-                <span className="text-3xl font-bold text-gray-900">${product.price}</span>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
+                <span className="text-2xl sm:text-3xl font-bold text-gray-900">${product.price}</span>
                 {product.originalPrice && (
-                  <span className="text-xl text-gray-500 line-through">${product.originalPrice}</span>
+                  <span className="text-lg sm:text-xl text-gray-500 line-through">${product.originalPrice}</span>
                 )}
                 {product.originalPrice && (
-                  <Badge color="green" className="text-sm">
+                  <Badge color="green" className="text-sm self-start sm:self-auto">
                     %{getDiscountPercentage()} İndirim
                   </Badge>
                 )}
@@ -465,53 +463,55 @@ function ProductDetailContent() {
                 </div>
               </div>
 
-              <div className="flex space-x-4">
+              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                 <GradientButton
                   variant="blue-purple"
                   size="lg"
                   onClick={handleAddToCart}
                   disabled={!product.inStock}
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                 >
                   <ShoppingBag className="w-5 h-5 mr-2" />
                   {product.inStock ? 'Sepete Ekle' : 'Stokta Yok'}
                 </GradientButton>
-                <Button
-                  variant="outline"
-                  className="px-6"
-                  onClick={() => {
-                    if (!product) return;
-                    const mapped: ProductType = {
-                      id: product.id,
-                      name: product.name,
-                      price: product.price,
-                      originalPrice: product.originalPrice,
-                      image: product.images?.[0] || '',
-                      category: product.category,
-                      brand: undefined,
-                      rating: product.rating || 0,
-                      reviewCount: product.reviewCount || 0,
-                      description: product.description || '',
-                      inStock: product.inStock,
-                      isNew: product.isNew,
-                      isPopular: product.isPopular,
-                    };
-                    const wasFav = has(product.id);
-                    toggle(mapped);
-                    setIsFavorite((v) => !v);
-                    showToast(`${product.name} ${wasFav ? 'favorilerden çıkarıldı' : 'favorilere eklendi'}!`, 'success');
-                  }}
-                >
-                  <Heart className={`w-5 h-5 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                  {isFavorite ? 'Favoride' : 'Favori'}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="px-6"
-                >
-                  <Share2 className="w-5 h-5 mr-2" />
-                  Paylaş
-                </Button>
+                <div className="flex space-x-2 sm:space-x-4">
+                  <Button
+                    variant="outline"
+                    className="flex-1 sm:px-6"
+                    onClick={() => {
+                      if (!product) return;
+                      const mapped: ProductType = {
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        originalPrice: product.originalPrice,
+                        image: product.images?.[0] || '',
+                        category: product.category,
+                        brand: undefined,
+                        rating: product.rating || 0,
+                        reviewCount: product.reviewCount || 0,
+                        description: product.description || '',
+                        inStock: product.inStock,
+                        isNew: product.isNew,
+                        isPopular: product.isPopular,
+                      };
+                      const wasFav = has(product.id);
+                      toggle(mapped);
+                      setIsFavorite((v) => !v);
+                      showToast(`${product.name} ${wasFav ? 'favorilerden çıkarıldı' : 'favorilere eklendi'}!`, 'success');
+                    }}
+                  >
+                    <Heart className={`w-5 h-5 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                    {isFavorite ? 'Favoride' : 'Favori'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 sm:px-4"
+                  >
+                    <Share2 className="w-5 h-5 mr-2" />
+                    Paylaş
+                  </Button>
+                </div>
               </div>
             </div>
 

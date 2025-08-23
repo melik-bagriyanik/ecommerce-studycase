@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Sparkles, TrendingUp, Clock } from 'lucide-react';
+import { Sparkles, TrendingUp, Clock, AlertCircle } from 'lucide-react';
 import { Product } from '../../types/Product';
 import { getProductRecommendations } from '../../utils/recommendations';
+import { getConfig } from '../../utils/config';
 import Card from '../ui/Card';
 import Tag from '../ui/Tag';
+
+const config = getConfig();
 
 interface ProductRecommendationsProps {
   currentProduct: Product;
@@ -23,11 +26,13 @@ export default function ProductRecommendations({
   const [reasoning, setReasoning] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [isRateLimited, setIsRateLimited] = useState(false);
 
   const fetchRecommendations = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+      setIsRateLimited(false);
 
       const response = await getProductRecommendations({
         productId: String(currentProduct.id),
@@ -37,6 +42,11 @@ export default function ProductRecommendations({
         allProducts
       });
 
+      // Check if response indicates rate limiting
+      if (response.rateLimited) {
+        setIsRateLimited(true);
+      }
+
       // Önerilen ürünleri bul
       const recommendedProducts = allProducts.filter(product =>
         response.recommendedProductIds.includes(String(product.id))
@@ -45,15 +55,30 @@ export default function ProductRecommendations({
       setRecommendations(recommendedProducts);
       setReasoning(response.reasoning);
       setRetryCount(0); // Reset retry count on success
-    } catch (err) {
+    } catch (err: any) {
       console.error('Öneri sistemi hatası:', err);
       
-      // Rate limit hatası durumunda retry logic
-      if (retryCount < 2) {
+      // Don't retry if it's a rate limit error
+      if (err.message?.includes('rate limit') || err.message?.includes('429')) {
+        setIsRateLimited(true);
+        setError('Öneri sistemi yoğun. Akıllı öneriler sunuluyor.');
+        
+        // Fallback: Aynı kategorideki ürünler
+        const fallbackProducts = allProducts
+          .filter(p => p.id !== currentProduct.id && p.category === currentProduct.category)
+          .slice(0, config.FALLBACK.MAX_RECOMMENDATIONS);
+        setRecommendations(fallbackProducts);
+        setReasoning('Kategori bazlı öneriler');
+        setLoading(false);
+        return;
+      }
+      
+      // Only retry for other types of errors, and limit retries
+      if (retryCount < config.FALLBACK.RETRY_ATTEMPTS) {
         setRetryCount(prev => prev + 1);
         setTimeout(() => {
           fetchRecommendations();
-        }, 2000 * (retryCount + 1)); // Exponential backoff
+        }, config.FALLBACK.RETRY_DELAY_MS);
         return;
       }
       
@@ -62,7 +87,7 @@ export default function ProductRecommendations({
       // Fallback: Aynı kategorideki ürünler
       const fallbackProducts = allProducts
         .filter(p => p.id !== currentProduct.id && p.category === currentProduct.category)
-        .slice(0, 3);
+        .slice(0, config.FALLBACK.MAX_RECOMMENDATIONS);
       setRecommendations(fallbackProducts);
       setReasoning('Aynı kategorideki benzer ürünler');
     } finally {
@@ -74,7 +99,7 @@ export default function ProductRecommendations({
     // Debounce the API call
     const timeoutId = setTimeout(() => {
       fetchRecommendations();
-    }, 500);
+    }, config.UI.DEBOUNCE_MS);
 
     return () => clearTimeout(timeoutId);
   }, [fetchRecommendations]);
@@ -87,12 +112,12 @@ export default function ProductRecommendations({
           <h3 className="text-lg font-semibold text-gray-900">Önerilen Ürünler</h3>
           {retryCount > 0 && (
             <span className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
-              Yeniden deneniyor... ({retryCount}/2)
+              Yeniden deneniyor... ({retryCount}/{config.FALLBACK.RETRY_ATTEMPTS})
             </span>
           )}
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {Array.from({ length: 5 }).map((_, index) => (
+          {Array.from({ length: config.FALLBACK.MAX_RECOMMENDATIONS + 2 }).map((_, index) => (
             <div key={index} className="animate-pulse">
               <div className="bg-gray-200 rounded-lg h-24 mb-2"></div>
               <div className="space-y-1">
@@ -138,18 +163,32 @@ export default function ProductRecommendations({
       <div className="flex items-center space-x-2 mb-4">
         <Sparkles className="w-5 h-5 text-purple-600" />
         <h3 className="text-lg font-semibold text-gray-900">Önerilen Ürünler</h3>
-        {reasoning && (
+        {isRateLimited ? (
+          <Tag color="yellow" className="text-xs">
+            <AlertCircle className="w-3 h-3" />
+            Akıllı Öneri
+          </Tag>
+        ) : reasoning ? (
           <Tag color="purple" className="text-xs">
             <TrendingUp className="w-3 h-3" />
             AI Önerisi
           </Tag>
-        )}
+        ) : null}
       </div>
       
       {reasoning && (
         <p className="text-sm text-gray-600 mb-4 italic">
           "{reasoning}"
         </p>
+      )}
+
+      {isRateLimited && (
+        <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+          <p className="text-sm text-orange-700">
+            <AlertCircle className="w-4 h-4 inline mr-1" />
+            Öneri sistemi yoğun olduğu için akıllı öneriler sunuluyor.
+          </p>
+        </div>
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">

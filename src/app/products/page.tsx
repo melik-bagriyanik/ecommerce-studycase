@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
+import { ArrowUp } from 'lucide-react';
 
 // Components
 import {
@@ -366,11 +367,26 @@ function ProductsContent() {
   };
 
   const totalPages = Math.ceil(filteredProducts.length / pageSize);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Scroll to top functionality
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <ProductsHeader 
           filterType={filterType}
@@ -439,8 +455,10 @@ function ProductsContent() {
         )}
       </div>
 
-      {/* Footer */}
-      <ProductsFooter />
+              {/* Footer */}
+        <div className="mt-8 sm:mt-12">
+          <ProductsFooter />
+        </div>
 
       {/* Filters Drawer - Mobile */}
       <ProductsFiltersDrawer
@@ -497,6 +515,17 @@ function ProductsContent() {
       />
 
       {/* Cart Sidebar shown globally in layout */}
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 z-40 p-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-110"
+          aria-label="Yukarı çık"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 }

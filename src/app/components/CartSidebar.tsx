@@ -67,12 +67,12 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   return (
     <>
       <div 
-        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full max-w-[95vw] sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex-shrink-0 flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Sepetim</h2>
             <p className="text-sm text-gray-500">{totalItems} ürün</p>
@@ -88,7 +88,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
         </div>
 
         {/* Cart Items */}
-        <div style={{height:"400px"}} className="flex-1 overflow-y-auto p-6 )]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-8 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 relative">
           {cartItems.length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -103,14 +103,14 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <div key={item.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                   <div className="flex-shrink-0">
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-16 h-16 object-cover rounded-md"
+                      className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-md"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -157,7 +157,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
         {/* Cart Summary */}
         {cartItems.length > 0 && (
-          <div className="border-t border-gray-200 p-6">
+          <div className="flex-shrink-0 border-t border-gray-200 p-4 sm:p-6">
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Ara Toplam</span>
